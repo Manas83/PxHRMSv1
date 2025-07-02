@@ -28,7 +28,7 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {% if current_user.role == 'admin' %}
+                    {% if current_user.can_manage_employees %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
@@ -123,11 +123,14 @@
                             </a>
                         </li>
                     {% else %}
+                        <!-- Employee Dashboard -->
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('employee.dashboard') }}">
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
+                        
+                        <!-- Employee Basic Features -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-clock me-1"></i>Attendance & Leave
@@ -147,52 +150,22 @@
                                 </a></li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-graduation-cap me-1"></i>Training
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url_for('training.dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-2"></i>My Training
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('training.my_certifications') }}">
-                                    <i class="fas fa-certificate me-2"></i>My Certifications
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('training.add_certification') }}">
-                                    <i class="fas fa-plus me-2"></i>Add Certification
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-cog me-1"></i>Self Service
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url_for('self_service.dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Self Service Home
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('employee.profile') }}">
-                                    <i class="fas fa-user me-2"></i>My Profile
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('self_service.emergency_contacts') }}">
-                                    <i class="fas fa-phone me-2"></i>Emergency Contacts
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('self_service.policies') }}">
-                                    <i class="fas fa-file-contract me-2"></i>Company Policies
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('self_service.announcements') }}">
-                                    <i class="fas fa-bullhorn me-2"></i>Announcements
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('self_service.my_documents') }}">
-                                    <i class="fas fa-folder me-2"></i>My Documents
-                                </a></li>
-                            </ul>
-                        </li>
+                        
+                        <!-- Holidays - visible to all employees -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('exit_management.dashboard') }}">
-                                <i class="fas fa-sign-out-alt me-1"></i>Exit Request
+                            <a class="nav-link" href="{{ url_for('admin.holidays') }}">
+                                <i class="fas fa-gift me-1"></i>Holidays
                             </a>
                         </li>
+                        
+                        <!-- My Profile -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('employee.profile') }}">
+                                <i class="fas fa-user me-1"></i>My Profile
+                            </a>
+                        </li>
+
+                        <!-- Manager Features - only if user is manager -->
                         {% if current_user.is_manager %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

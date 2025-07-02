@@ -55,8 +55,33 @@ class User(UserMixin, db.Model):
     
     @property
     def is_manager(self):
-        """Check if user has any reportees"""
-        return bool(self.reportees)
+        """Check if user has any reportees or has manager role"""
+        return self.role == 'manager' or bool(self.reportees)
+    
+    @property
+    def is_admin(self):
+        """Check if user has admin role"""
+        return self.role == 'admin'
+    
+    @property
+    def is_hr(self):
+        """Check if user has HR role"""
+        return self.role == 'hr'
+    
+    @property
+    def is_employee(self):
+        """Check if user has employee role"""
+        return self.role == 'employee'
+    
+    @property
+    def can_access_all_data(self):
+        """Check if user can access all employee data"""
+        return self.role in ['admin', 'hr']
+    
+    @property
+    def can_manage_employees(self):
+        """Check if user can manage employees"""
+        return self.role in ['admin', 'hr']
     
     @property
     def full_name(self):

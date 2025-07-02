@@ -17,8 +17,8 @@ admin_bp = Blueprint('admin', __name__)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'admin':
-            flash('Access denied. Admin privileges required.', 'danger')
+        if not current_user.is_authenticated or not current_user.can_manage_employees:
+            flash('Access denied. Admin or HR privileges required.', 'danger')
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function

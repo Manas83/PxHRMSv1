@@ -89,6 +89,19 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    <label for="role" class="form-label">User Role *</label>
+                                    <select class="form-select" id="role" name="role" required>
+                                        <option value="">Select Role</option>
+                                        <option value="employee">Employee</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="hr">HR</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                    <div class="form-text">Select the user's system access level</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <label for="manager" class="form-label">Reporting Manager</label>
                                     <select class="form-select" id="manager" name="manager_id">
                                         <option value="">No Manager</option>

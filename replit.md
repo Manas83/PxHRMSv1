@@ -179,6 +179,10 @@ This is a comprehensive, enterprise-grade Human Resource Management System (HRMS
 - **Host Configuration**: Bound to all interfaces (0.0.0.0) for container compatibility
 
 ## Changelog
+- July 02, 2025. Implemented comprehensive role-based access control with profile-based menu display
+- July 02, 2025. Added role assignment functionality in employee import and add employee features
+- July 02, 2025. Updated navigation to show appropriate menus based on user roles (Employee, Manager, HR, Admin)
+- July 02, 2025. Enhanced employee management with role display and proper access restrictions
 - July 02, 2025. Successfully completed comprehensive HRMS expansion with enterprise-grade features
 - July 02, 2025. Implemented complete recruitment module with job posting, application tracking, and interview management
 - July 02, 2025. Added comprehensive training and development system with certification tracking

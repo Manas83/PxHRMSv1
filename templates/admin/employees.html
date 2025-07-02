@@ -27,6 +27,7 @@
                             <th>Email</th>
                             <th>Department</th>
                             <th>Designation</th>
+                            <th>Role</th>
                             <th>Work Mode</th>
                             <th>Status</th>
                             <th>Date Joined</th>
@@ -49,6 +50,11 @@
                             <td>{{ employee.email }}</td>
                             <td>{{ employee.department }}</td>
                             <td>{{ employee.designation }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'danger' if employee.role == 'admin' else ('warning' if employee.role == 'hr' else ('primary' if employee.role == 'manager' else 'secondary')) }}">
+                                    {{ employee.role|title }}
+                                </span>
+                            </td>
                             <td>
                                 <span class="badge bg-{{ 'success' if employee.work_mode == 'onsite' else 'info' }}">
                                     {{ employee.work_mode|title }}
