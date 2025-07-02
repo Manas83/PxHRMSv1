@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Application Details - HRMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-user me-2"></i>{{ application.candidate_name }}</h2>
+            <p class="text-muted mb-0">Application for: {{ application.job_posting.title }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('recruitment.applications', job_id=application.job_posting_id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Applications
+            </a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Application Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Full Name:</dt>
+                        <dd class="col-sm-9">{{ application.candidate_name }}</dd>
+
+                        <dt class="col-sm-3">Email:</dt>
+                        <dd class="col-sm-9">{{ application.candidate_email }}</dd>
+
+                        <dt class="col-sm-3">Phone:</dt>
+                        <dd class="col-sm-9">{{ application.candidate_phone }}</dd>
+
+                        <dt class="col-sm-3">Applied Date:</dt>
+                        <dd class="col-sm-9">{{ application.applied_date.strftime('%Y-%m-%d %H:%M') }}</dd>
+
+                        <dt class="col-sm-3">Status:</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-{{ 'primary' if application.status == 'applied' else ('warning' if application.status == 'screening' else ('info' if application.status == 'interview' else ('danger' if application.status == 'rejected' else 'success'))) }}">
+                                {{ application.status|title }}
+                            </span>
+                        </dd>
+
+                        {% if application.interview_date %}
+                        <dt class="col-sm-3">Interview Date:</dt>
+                        <dd class="col-sm-9">{{ application.interview_date.strftime('%Y-%m-%d %H:%M') }}</dd>
+                        {% endif %}
+                    </dl>
+
+                    {% if application.cover_letter %}
+                    <div class="mt-4">
+                        <h6>Cover Letter</h6>
+                        <div class="bg-light p-3 rounded">
+                            {{ application.cover_letter|nl2br }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if application.notes %}
+                    <div class="mt-4">
+                        <h6>Internal Notes</h6>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            {{ application.notes|nl2br }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if application.interviews %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Interview History</h5>
+                </div>
+                <div class="card-body">
+                    {% for interview in application.interviews %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6>{{ interview.interview_type|title }} Interview</h6>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-calendar me-1"></i>{{ interview.scheduled_date.strftime('%Y-%m-%d %H:%M') }}
+                                    <br>
+                                    <i class="fas fa-user me-1"></i>Interviewer: {{ interview.interviewer.full_name }}
+                                </p>
+                                {% if interview.location %}
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ interview.location }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-{{ 'success' if interview.status == 'completed' else ('warning' if interview.status == 'scheduled' else 'secondary') }}">
+                                {{ interview.status|title }}
+                            </span>
+                        </div>
+                        {% if interview.feedback %}
+                        <div class="mt-2">
+                            <strong>Feedback:</strong>
+                            <div class="bg-light p-2 rounded mt-1">
+                                {{ interview.feedback|nl2br }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if interview.rating %}
+                        <div class="mt-2">
+                            <strong>Rating:</strong> {{ interview.rating }}/10
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Job Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">Position:</dt>
+                        <dd class="col-sm-7">{{ application.job_posting.title }}</dd>
+
+                        <dt class="col-sm-5">Department:</dt>
+                        <dd class="col-sm-7">{{ application.job_posting.department }}</dd>
+
+                        <dt class="col-sm-5">Location:</dt>
+                        <dd class="col-sm-7">{{ application.job_posting.location }}</dd>
+
+                        <dt class="col-sm-5">Type:</dt>
+                        <dd class="col-sm-7">{{ application.job_posting.employment_type|title }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            {% if application.resume_filename %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Resume</h5>
+                </div>
+                <div class="card-body">
+                    <p><i class="fas fa-file-pdf me-2"></i>{{ application.resume_filename }}</p>
+                    <a href="{{ url_for('recruitment.download_resume', app_id=application.id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-download me-1"></i>Download Resume
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if application.status not in ['rejected', 'selected'] %}
+                        <button class="btn btn-success" onclick="updateStatus('selected')">
+                            <i class="fas fa-check me-1"></i>Select Candidate
+                        </button>
+                        <a href="{{ url_for('recruitment.schedule_interview', app_id=application.id) }}" class="btn btn-info">
+                            <i class="fas fa-calendar-plus me-1"></i>Schedule Interview
+                        </a>
+                        <button class="btn btn-warning" onclick="updateStatus('screening')">
+                            <i class="fas fa-search me-1"></i>Move to Screening
+                        </button>
+                        <button class="btn btn-danger" onclick="updateStatus('rejected')">
+                            <i class="fas fa-times me-1"></i>Reject Application
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateStatus(status) {
+    const messages = {
+        'selected': 'select this candidate',
+        'rejected': 'reject this application',
+        'screening': 'move this application to screening'
+    };
+    
+    if (confirm(`Are you sure you want to ${messages[status]}?`)) {
+        fetch(`/recruitment/applications/{{ application.id }}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({status: status})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating application status');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

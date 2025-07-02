@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Job Postings - HRMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-briefcase me-2"></i>Job Postings</h2>
+        <a href="{{ url_for('recruitment.add_job') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Add New Job
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body">
+            {% if job_postings %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Department</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Posted Date</th>
+                                <th>Closing Date</th>
+                                <th>Applications</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in job_postings %}
+                            <tr>
+                                <td>
+                                    <strong>{{ job.title }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ job.salary_range or 'Salary not specified' }}</small>
+                                </td>
+                                <td>{{ job.department }}</td>
+                                <td>{{ job.location }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ job.employment_type|title }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if job.status == 'active' else ('warning' if job.status == 'draft' else 'secondary') }}">
+                                        {{ job.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ job.posted_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ job.closing_date.strftime('%Y-%m-%d') if job.closing_date else 'Not set' }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ job.applications|length }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('recruitment.view_job', job_id=job.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('recruitment.edit_job', job_id=job.id) }}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('recruitment.applications', job_id=job.id) }}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-users"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Job Postings</h4>
+                    <p class="text-muted">Create your first job posting to start recruiting.</p>
+                    <a href="{{ url_for('recruitment.add_job') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add New Job
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
