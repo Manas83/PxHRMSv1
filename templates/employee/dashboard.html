@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Dashboard - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-tachometer-alt me-2"></i>My Dashboard</h2>
+        <span class="badge bg-primary">{{ today.strftime('%B %d, %Y') }}</span>
+    </div>
+
+    <!-- Punch In/Out Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4><i class="fas fa-clock me-2"></i>Attendance</h4>
+                            {% if today_attendance %}
+                                {% if today_attendance.punch_in_time and not today_attendance.punch_out_time %}
+                                    <p class="mb-2">
+                                        <i class="fas fa-sign-in-alt me-2"></i>
+                                        Punched in at {{ today_attendance.punch_in_time.strftime('%H:%M:%S') }}
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="fas fa-stopwatch me-2"></i>
+                                        Working for {{ ((today_attendance.punch_in_time.now() - today_attendance.punch_in_time).total_seconds() / 3600)|round(2) }} hours
+                                    </p>
+                                {% elif today_attendance.punch_in_time and today_attendance.punch_out_time %}
+                                    <p class="mb-2">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Work completed for today
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="fas fa-clock me-2"></i>
+                                        Total hours: {{ (today_attendance.total_hours or 0)|round(2) }}
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <p class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    You haven't punched in today yet
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if today_attendance %}
+                                {% if today_attendance.punch_in_time and not today_attendance.punch_out_time %}
+                                    <button id="punchOutBtn" class="btn btn-light btn-lg">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Punch Out
+                                    </button>
+                                {% elif today_attendance.punch_in_time and today_attendance.punch_out_time %}
+                                    <button class="btn btn-success btn-lg" disabled>
+                                        <i class="fas fa-check me-2"></i>Day Complete
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <button id="punchInBtn" class="btn btn-light btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Punch In
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Leave Balance -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Leave Balance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center border-end">
+                                <h4 class="text-success">{{ leave_balances.sick }}</h4>
+                                <small>Sick Leave</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h4 class="text-info">{{ leave_balances.casual }}</h4>
+                                <small>Casual Leave</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center border-end">
+                                <h4 class="text-warning">{{ leave_balances.earned }}</h4>
+                                <small>Earned Leave</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h4 class="text-secondary">{{ leave_balances.optional }}</h4>
+                                <small>Optional Holiday</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('employee.leave_request') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-2"></i>Request Leave
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Attendance -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history me-2"></i>Recent Attendance (7 days)</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_attendance %}
+                        {% for attendance in recent_attendance %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>{{ attendance.date.strftime('%Y-%m-%d') }}</strong><br>
+                                <small class="text-muted">{{ attendance.date.strftime('%A') }}</small>
+                            </div>
+                            <div class="text-end">
+                                {% if attendance.punch_in_time %}
+                                    <span class="badge bg-success">
+                                        {{ attendance.punch_in_time.strftime('%H:%M') }}
+                                        {% if attendance.punch_out_time %}
+                                            - {{ attendance.punch_out_time.strftime('%H:%M') }}
+                                        {% endif %}
+                                    </span>
+                                    {% if attendance.total_hours %}
+                                        <br><small class="text-muted">{{ attendance.total_hours|round(1) }}h</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Absent</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No recent attendance records.</p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{{ url_for('employee.attendance') }}" class="btn btn-outline-primary btn-sm">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Leaves -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-hourglass-half me-2"></i>Pending Leave Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_leaves > 0 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            You have <strong>{{ pending_leaves }}</strong> pending leave request(s).
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No pending leave requests.</p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{{ url_for('employee.leave_history') }}" class="btn btn-outline-primary btn-sm">
+                            View History <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Holidays -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-gift me-2"></i>Upcoming Holidays</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_holidays %}
+                        {% for holiday in upcoming_holidays %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>{{ holiday.name }}</strong><br>
+                                <small class="text-muted">{{ holiday.date.strftime('%A, %B %d') }}</small>
+                            </div>
+                            <span class="badge bg-{{ 'warning' if holiday.is_optional else 'info' }}">
+                                {{ 'Optional' if holiday.is_optional else 'Public' }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No upcoming holidays.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Punch In/Out functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const punchInBtn = document.getElementById('punchInBtn');
+    const punchOutBtn = document.getElementById('punchOutBtn');
+
+    if (punchInBtn) {
+        punchInBtn.addEventListener('click', function() {
+            handlePunch('punch-in');
+        });
+    }
+
+    if (punchOutBtn) {
+        punchOutBtn.addEventListener('click', function() {
+            handlePunch('punch-out');
+        });
+    }
+
+    function handlePunch(action) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                sendPunchRequest(action, position.coords.latitude, position.coords.longitude);
+            }, function(error) {
+                sendPunchRequest(action, null, null);
+            });
+        } else {
+            sendPunchRequest(action, null, null);
+        }
+    }
+
+    function sendPunchRequest(action, latitude, longitude) {
+        const url = action === 'punch-in' ? '/employee/punch-in' : '/employee/punch-out';
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                latitude: latitude,
+                longitude: longitude
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    }
+});
+</script>
+{% endblock %}

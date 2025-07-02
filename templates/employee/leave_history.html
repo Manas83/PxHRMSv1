@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Leave History - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-history me-2"></i>My Leave History</h2>
+        <a href="{{ url_for('employee.leave_request') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Request New Leave
+        </a>
+    </div>
+
+    <!-- Leave Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-hourglass-half fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Pending</h5>
+                            <h3 class="mb-0">{{ leave_requests|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Approved</h5>
+                            <h3 class="mb-0">{{ leave_requests|selectattr('status', 'equalto', 'approved')|list|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-times-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Rejected</h5>
+                            <h3 class="mb-0">{{ leave_requests|selectattr('status', 'equalto', 'rejected')|list|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-alt fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Total Days</h5>
+                            <h3 class="mb-0">{{ leave_requests|selectattr('status', 'equalto', 'approved')|map(attribute='days_requested')|sum }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Requests Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-list me-2"></i>Leave Requests</h5>
+        </div>
+        <div class="card-body">
+            {% if leave_requests %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Leave Type</th>
+                                <th>Duration</th>
+                                <th>Days</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave_request in leave_requests %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">{{ leave_request.leave_type|title }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ leave_request.start_date.strftime('%Y-%m-%d') }}</strong> to 
+                                    <strong>{{ leave_request.end_date.strftime('%Y-%m-%d') }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">{{ leave_request.days_requested }} days</span>
+                                </td>
+                                <td>{{ leave_request.applied_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'warning' if leave_request.status == 'pending' else 'success' if leave_request.status == 'approved' else 'danger' }}">
+                                        {{ leave_request.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#leaveModal{{ leave_request.id }}">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Leave Details Modal -->
+                            <div class="modal fade" id="leaveModal{{ leave_request.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Leave Request Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>Leave Type:</strong> {{ leave_request.leave_type|title }}</p>
+                                                    <p><strong>Start Date:</strong> {{ leave_request.start_date.strftime('%Y-%m-%d') }}</p>
+                                                    <p><strong>End Date:</strong> {{ leave_request.end_date.strftime('%Y-%m-%d') }}</p>
+                                                    <p><strong>Days Requested:</strong> {{ leave_request.days_requested }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>Applied Date:</strong> {{ leave_request.applied_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                                                    <p><strong>Status:</strong> 
+                                                        <span class="badge bg-{{ 'warning' if leave_request.status == 'pending' else 'success' if leave_request.status == 'approved' else 'danger' }}">
+                                                            {{ leave_request.status|title }}
+                                                        </span>
+                                                    </p>
+                                                    {% if leave_request.reviewed_date %}
+                                                        <p><strong>Reviewed Date:</strong> {{ leave_request.reviewed_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            <hr>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Reason:</strong>
+                                                <p class="mt-2">{{ leave_request.reason }}</p>
+                                            </div>
+
+                                            {% if leave_request.admin_comments %}
+                                            <hr>
+                                            <div class="mb-3">
+                                                <strong>Admin Comments:</strong>
+                                                <div class="alert alert-{{ 'success' if leave_request.status == 'approved' else 'danger' }} mt-2">
+                                                    {{ leave_request.admin_comments }}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if leave_request.status == 'pending' %}
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                Your leave request is currently being reviewed by HR. You will receive an email notification once it's processed.
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h5>No Leave Requests Found</h5>
+                    <p class="text-muted">You haven't submitted any leave requests yet.</p>
+                    <a href="{{ url_for('employee.leave_request') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Request Your First Leave
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Current Leave Balance -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-chart-pie me-2"></i>Current Leave Balance</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center border-end">
+                        <h4 class="text-success">{{ current_user.get_leave_balance('sick') }}</h4>
+                        <p class="mb-0">Sick Leave</p>
+                        <small class="text-muted">Available</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center border-end">
+                        <h4 class="text-info">{{ current_user.get_leave_balance('casual') }}</h4>
+                        <p class="mb-0">Casual Leave</p>
+                        <small class="text-muted">Available</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center border-end">
+                        <h4 class="text-warning">{{ current_user.get_leave_balance('earned') }}</h4>
+                        <p class="mb-0">Earned Leave</p>
+                        <small class="text-muted">Available</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h4 class="text-secondary">{{ current_user.get_leave_balance('optional') }}</h4>
+                        <p class="mb-0">Optional Holiday</p>
+                        <small class="text-muted">Available</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

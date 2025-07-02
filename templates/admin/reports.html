@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h2>
+
+    <div class="row">
+        <!-- Attendance Report -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock me-2"></i>Attendance Report</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Generate detailed attendance reports for employees.</p>
+                    
+                    <form method="GET" action="{{ url_for('admin.download_attendance_report') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-download me-2"></i>Download CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Report -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Leave Report</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Generate leave usage and balance reports.</p>
+                    <button class="btn btn-secondary" disabled>
+                        <i class="fas fa-download me-2"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Summary -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-users me-2"></i>Employee Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Comprehensive employee data export.</p>
+                    <button class="btn btn-secondary" disabled>
+                        <i class="fas fa-download me-2"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Stats -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Monthly Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Monthly attendance and productivity metrics.</p>
+                    <button class="btn btn-secondary" disabled>
+                        <i class="fas fa-eye me-2"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tachometer-alt me-2"></i>Quick Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h4 class="text-primary">{{ total_employees or 0 }}</h4>
+                                <p class="mb-0">Total Employees</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h4 class="text-success">{{ today_present or 0 }}</h4>
+                                <p class="mb-0">Present Today</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h4 class="text-warning">{{ pending_leaves or 0 }}</h4>
+                                <p class="mb-0">Pending Leaves</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h4 class="text-info">{{ active_projects or 0 }}</h4>
+                                <p class="mb-0">Active Projects</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set default dates (current month)
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    document.getElementById('start_date').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('end_date').value = lastDay.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}

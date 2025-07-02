@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-users-cog me-2"></i>Manager Dashboard</h2>
+        <span class="badge bg-primary">{{ today.strftime('%B %d, %Y') }}</span>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Team Members</h5>
+                            <h3 class="mb-0">{{ total_reportees }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Present Today</h5>
+                            <h3 class="mb-0">{{ today_attendance }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Pending Leaves</h5>
+                            <h3 class="mb-0">{{ pending_leaves }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-percentage fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Attendance Rate</h5>
+                            <h3 class="mb-0">{{ ((today_attendance / total_reportees * 100) if total_reportees > 0 else 0)|round(1) }}%</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('manager.team_leaves') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-calendar-alt me-2"></i>Review Leave Requests
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('manager.team_attendance') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-clock me-2"></i>Team Attendance
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('reports.attendance_report') }}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-chart-bar me-2"></i>Team Reports
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('reports.import_employees') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-upload me-2"></i>Import Employees
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Overview -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-users me-2"></i>My Team</h5>
+                </div>
+                <div class="card-body">
+                    {% if reportees %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Status</th>
+                                        <th>Today's Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for employee in reportees %}
+                                    <tr>
+                                        <td><strong>{{ employee.employee_id }}</strong></td>
+                                        <td>{{ employee.full_name }}</td>
+                                        <td>{{ employee.department }}</td>
+                                        <td>{{ employee.designation }}</td>
+                                        <td>
+                                            {% if employee.active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% set attendance = employee.attendance_records|selectattr('date', 'equalto', today)|first %}
+                                            {% if attendance and attendance.punch_in_time %}
+                                                {% if attendance.punch_out_time %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% else %}
+                                                    <span class="badge bg-info">Present</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-warning">Absent</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No team members assigned yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

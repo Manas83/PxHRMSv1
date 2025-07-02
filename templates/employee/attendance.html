@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}My Attendance - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clock me-2"></i>My Attendance</h2>
+        <div class="d-flex align-items-center">
+            <span class="me-3">
+                <strong>Total Days:</strong> {{ total_days }}
+            </span>
+            <span class="badge bg-primary">
+                <strong>Total Hours:</strong> {{ total_hours|round(1) }}h
+            </span>
+        </div>
+    </div>
+
+    <!-- Monthly Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-check fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Days Present</h5>
+                            <h3 class="mb-0">{{ total_days }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Total Hours</h5>
+                            <h3 class="mb-0">{{ total_hours|round(1) }}h</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calculator fa-2x me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Avg Hours/Day</h5>
+                            <h3 class="mb-0">{{ ((total_hours / total_days) if total_days > 0 else 0)|round(1) }}h</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Records -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-list me-2"></i>Attendance Records (Current Month)</h5>
+        </div>
+        <div class="card-body">
+            {% if attendance_records %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Punch In</th>
+                                <th>Punch Out</th>
+                                <th>Total Hours</th>
+                                <th>Work Mode</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attendance in attendance_records %}
+                            <tr>
+                                <td>
+                                    <strong>{{ attendance.date.strftime('%Y-%m-%d') }}</strong>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ attendance.date.strftime('%A') }}</span>
+                                </td>
+                                <td>
+                                    {% if attendance.punch_in_time %}
+                                        <span class="text-success">
+                                            <i class="fas fa-sign-in-alt me-1"></i>
+                                            {{ attendance.punch_in_time.strftime('%H:%M:%S') }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attendance.punch_out_time %}
+                                        <span class="text-danger">
+                                            <i class="fas fa-sign-out-alt me-1"></i>
+                                            {{ attendance.punch_out_time.strftime('%H:%M:%S') }}
+                                        </span>
+                                    {% elif attendance.punch_in_time %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attendance.total_hours %}
+                                        <strong>{{ attendance.total_hours|round(2) }}h</strong>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attendance.work_mode_detected %}
+                                        <span class="badge bg-{{ 'success' if attendance.work_mode_detected == 'onsite' else 'info' }}">
+                                            {{ attendance.work_mode_detected|title }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Unknown</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if attendance.status == 'present' else 'danger' if attendance.status == 'absent' else 'warning' }}">
+                                        {{ attendance.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h5>No Attendance Records</h5>
+                    <p class="text-muted">You haven't marked attendance for this month yet.</p>
+                    <a href="{{ url_for('employee.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Attendance Calendar View -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-calendar me-2"></i>Calendar View</h5>
+        </div>
+        <div class="card-body">
+            <div id="attendanceCalendar">
+                <!-- Calendar will be rendered here by JavaScript -->
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Calendar view coming soon...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Future enhancement: Add calendar visualization
+document.addEventListener('DOMContentLoaded', function() {
+    // Calendar functionality can be added here using a library like FullCalendar
+    console.log('Attendance page loaded');
+});
+</script>
+{% endblock %}

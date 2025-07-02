@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Request Leave - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-plus me-2"></i>Request Leave</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Leave Balance Display -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-2">
+                                    <h5 class="text-success mb-1">{{ leave_balances.sick }}</h5>
+                                    <small>Sick Leave</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-2">
+                                    <h5 class="text-info mb-1">{{ leave_balances.casual }}</h5>
+                                    <small>Casual Leave</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-2">
+                                    <h5 class="text-warning mb-1">{{ leave_balances.earned }}</h5>
+                                    <small>Earned Leave</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-2">
+                                    <h5 class="text-secondary mb-1">{{ leave_balances.optional }}</h5>
+                                    <small>Optional Holiday</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_type" class="form-label">Leave Type *</label>
+                                    <select class="form-select" id="leave_type" name="leave_type" required>
+                                        <option value="">Select Leave Type</option>
+                                        <option value="sick">Sick Leave ({{ leave_balances.sick }} available)</option>
+                                        <option value="casual">Casual Leave ({{ leave_balances.casual }} available)</option>
+                                        <option value="earned">Earned Leave ({{ leave_balances.earned }} available)</option>
+                                        <option value="optional">Optional Holiday ({{ leave_balances.optional }} available)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="days_requested" class="form-label">Days Requested</label>
+                                    <input type="number" class="form-control" id="days_requested" name="days_requested" readonly>
+                                    <div class="form-text">Calculated automatically based on dates</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label">Start Date *</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">End Date *</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Leave *</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="4" required 
+                                      placeholder="Please provide a detailed reason for your leave request..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="document" class="form-label">Supporting Document (Optional)</label>
+                            <input type="file" class="form-control" id="document" name="document" 
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            <div class="form-text">
+                                Upload medical certificate or other supporting documents. 
+                                Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max: 16MB)
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Your leave request will be sent to HR for approval. 
+                            You will receive an email notification once it's reviewed.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('employee.dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const daysRequestedInput = document.getElementById('days_requested');
+    const leaveTypeSelect = document.getElementById('leave_type');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    startDateInput.min = today;
+    endDateInput.min = today;
+
+    // Calculate days when dates change
+    function calculateDays() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        
+        if (startDate && endDate && endDate >= startDate) {
+            const timeDiff = endDate.getTime() - startDate.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+            daysRequestedInput.value = daysDiff;
+            
+            // Validate against available balance
+            validateLeaveBalance();
+        } else {
+            daysRequestedInput.value = '';
+        }
+    }
+
+    // Validate leave balance
+    function validateLeaveBalance() {
+        const leaveType = leaveTypeSelect.value;
+        const daysRequested = parseInt(daysRequestedInput.value);
+        
+        if (leaveType && daysRequested) {
+            const balances = {
+                'sick': {{ leave_balances.sick }},
+                'casual': {{ leave_balances.casual }},
+                'earned': {{ leave_balances.earned }},
+                'optional': {{ leave_balances.optional }}
+            };
+            
+            const availableBalance = balances[leaveType];
+            
+            if (daysRequested > availableBalance) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Insufficient Balance';
+                submitBtn.className = 'btn btn-danger';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Request';
+                submitBtn.className = 'btn btn-primary';
+            }
+        }
+    }
+
+    // Update end date minimum when start date changes
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value && endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+        calculateDays();
+    });
+
+    endDateInput.addEventListener('change', calculateDays);
+    leaveTypeSelect.addEventListener('change', validateLeaveBalance);
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const daysRequested = parseInt(daysRequestedInput.value);
+        const leaveType = leaveTypeSelect.value;
+        
+        if (!daysRequested || daysRequested <= 0) {
+            e.preventDefault();
+            alert('Please select valid dates for your leave request.');
+            return;
+        }
+        
+        const balances = {
+            'sick': {{ leave_balances.sick }},
+            'casual': {{ leave_balances.casual }},
+            'earned': {{ leave_balances.earned }},
+            'optional': {{ leave_balances.optional }}
+        };
+        
+        if (daysRequested > balances[leaveType]) {
+            e.preventDefault();
+            alert('You do not have sufficient leave balance for this request.');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

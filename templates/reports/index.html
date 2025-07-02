@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h2>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="row">
+        <!-- Attendance Reports -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-clock me-2"></i>Attendance Reports</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Generate detailed attendance reports with filtering options and export to PDF, CSV, or Excel formats.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Daily/Monthly attendance tracking</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Department-wise reports</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Work mode analysis</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Export in multiple formats</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('reports.attendance_report') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-file-alt me-2"></i>Generate Attendance Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Reports -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Leave Reports</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Comprehensive leave analysis and reports for better leave management and planning.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Leave type analysis</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Approval status tracking</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Leave balance reports</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Department-wise breakdown</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('reports.leave_report') }}" class="btn btn-success w-100">
+                        <i class="fas fa-calendar-check me-2"></i>Generate Leave Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Import -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-upload me-2"></i>Employee Import</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Bulk import employee data from CSV or Excel files with manager assignment support.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>CSV/Excel file support</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Manager assignment</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Data validation</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Error reporting</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('reports.import_employees') }}" class="btn btn-info w-100">
+                        <i class="fas fa-file-upload me-2"></i>Import Employees
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Formats -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-download me-2"></i>Export Options</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Multiple export formats available for all reports with professional formatting.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-file-pdf text-danger me-2"></i>PDF - Professional formatted reports</li>
+                        <li><i class="fas fa-file-csv text-success me-2"></i>CSV - Data analysis compatible</li>
+                        <li><i class="fas fa-file-excel text-primary me-2"></i>Excel - Advanced formatting</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-info-circle me-2"></i>Available with all reports
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Statistics -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Quick Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-1">
+                                    <i class="fas fa-users"></i>
+                                </h4>
+                                <h5 class="mb-1">Total Employees</h5>
+                                <p class="text-muted">Active workforce</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h4 class="text-success mb-1">
+                                    <i class="fas fa-clock"></i>
+                                </h4>
+                                <h5 class="mb-1">Attendance Today</h5>
+                                <p class="text-muted">Present employees</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h4 class="text-warning mb-1">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </h4>
+                                <h5 class="mb-1">Pending Leaves</h5>
+                                <p class="text-muted">Awaiting approval</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-info mb-1">
+                                <i class="fas fa-chart-bar"></i>
+                            </h4>
+                            <h5 class="mb-1">Reports Generated</h5>
+                            <p class="text-muted">This month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+Here is a **consolidated requirement list** for your **HRMS application**, incorporating all essentials and the additional features you requested:
+
+---
+
+## ✅ **1. User Management & Access Control**
+
+### 👥 **Employee Login**
+
+* Unique login ID per employee (email or employee code)
+* First-time login requires **password reset**
+* Passwords stored securely (bcrypt or argon2)
+
+### 🔐 **Roles**
+
+* **Admin (HR):**
+
+  * Add/edit employee records
+  * Manage attendance, leave, policies
+  * Approve/reject leave
+  * View/download reports
+* **Employee:**
+
+  * View profile, attendance, leave
+  * Punch in/out
+  * Raise leave requests
+  * Upload documents
+
+---
+
+## 🧑‍💼 **2. Employee Onboarding (Admin-Only)**
+
+* Add employee details:
+
+  * Name, email, phone, employee ID
+  * Department, designation, work mode (onsite/offsite)
+* On save:
+
+  * Create account
+  * Generate temporary password
+  * **Send onboarding email with login link**
+
+---
+
+## ⏱ **3. Attendance & Punch-In System**
+
+* Daily punch-in/punch-out (one entry each)
+* Track **time**, **IP address**, and **location (geo-tag)**
+* Automatic detection of **onsite vs offsite**
+* Prevent double punching or backdating
+* **Attendance calendar** view for employees and admin
+* Optionally allow **manual punch with justification** (admin review)
+
+---
+
+## 🌍 **4. Geo-tagging for Punch-in**
+
+* Use browser GPS (via JS + permissions)
+* Log latitude/longitude with punch-in
+* View on map (admin)
+
+---
+
+## 🌴 **5. Leave Management System**
+
+* Leave types:
+
+  * Sick, Casual, Earned, Optional Holiday
+* Submit leave request with:
+
+  * Date range
+  * Leave type
+  * Reason
+  * **Document upload** (e.g., medical certificate)
+* View leave balance & history
+* Admin dashboard for:
+
+  * Viewing & approving/rejecting leave
+  * Leave balance adjustment
+
+---
+
+## 🧮 **6. Leave Encashment / Carry-Forward Rules**
+
+* Admin-defined policy:
+
+  * Max encashable leaves per year
+  * Auto carry-forward rules
+* Leave balance ledger per employee
+
+---
+
+## 📅 **7. Holiday Calendar View**
+
+* Admin can define public holidays
+* Employees view in calendar format
+* Auto disables punching on holidays (optional)
+
+---
+
+## 📁 **8. Document Upload**
+
+* Employee upload:
+
+  * Leave justification
+  * Proof of remote work
+* Admin upload:
+
+  * Offer letters, ID proofs
+* Documents stored with metadata and access control
+
+---
+
+## 📊 **9. Dashboard & Reporting**
+
+### 🧑 Employee Dashboard
+
+* Punch-in status
+* Today's working hours
+* Leave balance
+* Attendance calendar
+* Alerts/notifications
+
+### 🧑‍💼 Admin Dashboard
+
+* Today's team punch-in status
+* Leaves pending approval
+* Monthly summaries (per dept or employee)
+
+### 📈 Reports
+
+* Downloadable CSV/PDF:
+
+  * Attendance report
+  * Leave usage report
+  * Working hour summaries
+
+---
+
+## ✉️ **10. Email Notifications**
+
+* Onboarding link (with temp password)
+* Password reset
+* Punch-in/out confirmation (optional)
+* Leave application & approval/rejection
+* Leave balance reminders
+
+---
+
+## 💻 **11. Frontend & UI**
+
+* Built with **HTML + JavaScript + CSS Framework** (Bootstrap/Materialize)
+* **Mobile responsive**:
+
+  * Touch-friendly punch-in
+  * Optimized for remote/offsite employees
+* Clean, modern UI with role-based views
+
+---
+
+## ⚙️ **12. Admin System Settings**
+
+* Configure:
+
+  * Work hours
+  * Leave policies
+  * Holidays
+* Manage user roles
+* Enable/disable geolocation tracking
+* Define encashment/carry-forward rules
+
+---
+
+## 🛡️ **13. Security & Compliance**
+
+* Secure password hashing
+* Role-based access control
+* CSRF protection
+* HTTPS recommended
+* Token-based email verification/reset
+* (Optional) Audit logging of admin actions
+
+---
+
+## 🧰 **14. Tech Stack**
+
+| Layer       | Stack                                        |
+| ----------- | -------------------------------------------- |
+| Frontend    | HTML + JS + Bootstrap                        |
+| Backend     | PHP (Laravel/Slim) or Python (Flask/FastAPI) |
+| Database    | MySQL                                        |
+| Email       | SMTP / SendGrid                              |
+| Location    | HTML5 Geolocation API                        |
+| File Upload | Backend file storage + MySQL link            |
+| Auth        | JWT / session-based login                    |
+
+

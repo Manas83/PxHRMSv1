@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clock me-2"></i>Attendance Management</h2>
+        
+        <form method="GET" class="d-flex align-items-center">
+            <label for="date" class="me-2">Date:</label>
+            <input type="date" class="form-control" id="date" name="date" 
+                   value="{{ selected_date.isoformat() }}" onchange="this.form.submit()">
+        </form>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Present</h5>
+                    <h3>{{ attendance_records|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5>Absent</h5>
+                    <h3>{{ absent_employees|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Total Employees</h5>
+                    <h3>{{ attendance_records|length + absent_employees|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Present Employees -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-check-circle me-2 text-success"></i>Present Employees</h5>
+                </div>
+                <div class="card-body">
+                    {% if attendance_records %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Punch In</th>
+                                        <th>Punch Out</th>
+                                        <th>Total Hours</th>
+                                        <th>Location</th>
+                                        <th>IP Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attendance, user in attendance_records %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ user.full_name }}</strong><br>
+                                                <small class="text-muted">{{ user.employee_id }} - {{ user.department }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if attendance.punch_in_time %}
+                                                <span class="text-success">
+                                                    <i class="fas fa-sign-in-alt me-1"></i>
+                                                    {{ attendance.punch_in_time.strftime('%H:%M:%S') }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if attendance.punch_out_time %}
+                                                <span class="text-danger">
+                                                    <i class="fas fa-sign-out-alt me-1"></i>
+                                                    {{ attendance.punch_out_time.strftime('%H:%M:%S') }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning">In Progress</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if attendance.total_hours %}
+                                                <strong>{{ attendance.total_hours|round(2) }}h</strong>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if attendance.work_mode_detected == 'onsite' else 'info' }}">
+                                                {{ attendance.work_mode_detected|title if attendance.work_mode_detected else 'Unknown' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ attendance.punch_in_ip or '-' }}</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-user-check fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No attendance records for this date.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Absent Employees -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user-times me-2 text-danger"></i>Absent Employees</h5>
+                </div>
+                <div class="card-body">
+                    {% if absent_employees %}
+                        <div class="list-group list-group-flush">
+                            {% for employee in absent_employees %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ employee.full_name }}</strong><br>
+                                    <small class="text-muted">{{ employee.employee_id }} - {{ employee.department }}</small>
+                                </div>
+                                <span class="badge bg-danger">Absent</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <p class="text-muted">All employees are present!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
