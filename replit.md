@@ -132,6 +132,9 @@ This is a comprehensive Human Resource Management System (HRMS) built with Flask
 - **Host Configuration**: Bound to all interfaces (0.0.0.0) for container compatibility
 
 ## Changelog
+- July 02, 2025. Successfully migrated project from Replit Agent to standard Replit environment
+- July 02, 2025. Created comprehensive UI templates for employee import and leave report functionality
+- July 02, 2025. Fixed SQLAlchemy compatibility warnings for Replit environment
 - July 02, 2025. Added manager/reportee feature with hierarchical leave approval workflow
 - July 02, 2025. Implemented advanced reporting with PDF/CSV/Excel export functionality
 - July 02, 2025. Added employee import feature with manager assignment support

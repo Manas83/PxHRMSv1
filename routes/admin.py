@@ -49,7 +49,7 @@ def dashboard():
     punched_in_users = db.session.query(Attendance.user_id).filter(
         Attendance.date == today,
         Attendance.punch_in_time.isnot(None)
-    ).subquery()
+    )
     
     not_punched_in = User.query.filter(
         User.role == 'employee',
