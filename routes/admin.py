@@ -69,7 +69,7 @@ def dashboard():
 @login_required
 @admin_required
 def employees():
-    employees = User.query.filter_by(role='employee').order_by(User.first_name).all()
+    employees = User.query.order_by(User.first_name).all()
     return render_template('admin/employees.html', employees=employees)
 
 @admin_bp.route('/employees/add', methods=['GET', 'POST'])

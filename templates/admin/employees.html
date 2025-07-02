@@ -61,17 +61,17 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ 'success' if employee.is_active else 'danger' }}">
-                                    {{ 'Active' if employee.is_active else 'Inactive' }}
+                                <span class="badge bg-{{ 'success' if employee.active else 'danger' }}">
+                                    {{ 'Active' if employee.active else 'Inactive' }}
                                 </span>
                             </td>
                             <td>{{ employee.date_joined.strftime('%Y-%m-%d') }}</td>
                             <td>
                                 <a href="{{ url_for('admin.toggle_employee_status', emp_id=employee.id) }}" 
-                                   class="btn btn-sm btn-{{ 'warning' if employee.is_active else 'success' }}"
-                                   onclick="return confirm('Are you sure you want to {{ 'deactivate' if employee.is_active else 'activate' }} this employee?')">
-                                    <i class="fas fa-{{ 'ban' if employee.is_active else 'check' }}"></i>
-                                    {{ 'Deactivate' if employee.is_active else 'Activate' }}
+                                   class="btn btn-sm btn-{{ 'warning' if employee.active else 'success' }}"
+                                   onclick="return confirm('Are you sure you want to {{ 'deactivate' if employee.active else 'activate' }} this employee?')">
+                                    <i class="fas fa-{{ 'ban' if employee.active else 'check' }}"></i>
+                                    {{ 'Deactivate' if employee.active else 'Activate' }}
                                 </a>
                             </td>
                         </tr>

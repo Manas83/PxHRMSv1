@@ -10,9 +10,14 @@ from werkzeug.security import generate_password_hash
 
 def create_test_users():
     with app.app_context():
-        # Check if users already exist
-        if User.query.count() > 0:
-            print("Users already exist. Skipping user creation.")
+        # Check if test users already exist
+        existing_test_emails = ['admin@company.com', 'hr@company.com', 'manager@company.com', 'employee@company.com']
+        existing_users = User.query.filter(User.email.in_(existing_test_emails)).all()
+        
+        if existing_users:
+            print("Test users already exist. Skipping creation.")
+            for user in existing_users:
+                print(f"- {user.email} (Role: {user.role})")
             return
         
         # Create admin user
