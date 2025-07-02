@@ -59,6 +59,10 @@ from routes.admin import admin_bp
 from routes.employee import employee_bp
 from routes.manager import manager_bp
 from routes.reports import reports_bp
+from routes.recruitment import recruitment_bp
+from routes.training import training_bp
+from routes.exit_management import exit_bp
+from routes.self_service import self_service_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -66,6 +70,10 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(employee_bp, url_prefix='/employee')
 app.register_blueprint(manager_bp)
 app.register_blueprint(reports_bp)
+app.register_blueprint(recruitment_bp)
+app.register_blueprint(training_bp)
+app.register_blueprint(exit_bp)
+app.register_blueprint(self_service_bp)
 
 with app.app_context():
     # Import models to ensure tables are created

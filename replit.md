@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a comprehensive Human Resource Management System (HRMS) built with Flask, designed to manage employee data, attendance tracking, leave management, and HR administrative tasks. The system provides role-based access control with separate interfaces for administrators and employees.
+This is a comprehensive, enterprise-grade Human Resource Management System (HRMS) built with Flask, designed to handle all aspects of HR operations including employee lifecycle management, recruitment, training, attendance tracking, leave management, exit processes, and employee self-service. The system provides role-based access control with interfaces for administrators, managers, and employees, covering the complete spectrum of HR functionality.
 
 ## System Architecture
 
@@ -29,38 +29,85 @@ This is a comprehensive Human Resource Management System (HRMS) built with Flask
 ## Key Components
 
 ### Authentication & Authorization
-- **Role-based Access Control**: Admin and Employee roles
+- **Role-based Access Control**: Admin, Manager, and Employee roles with hierarchical permissions
 - **Secure Password Storage**: Werkzeug password hashing
 - **Session Management**: Flask-Login with remember me functionality
 - **Password Reset**: Token-based password reset via email
 - **First-time Login**: Mandatory password change for new employees
 
-### User Management
-- **Employee Onboarding**: Admin-controlled employee creation
-- **Profile Management**: Employee self-service profile viewing
-- **Account Activation**: Email-based account activation
-- **Role Assignment**: Admin/Employee role differentiation
+### Employee Information Management
+- **Personal & Job Details**: Comprehensive employee profiles with employment history
+- **Emergency Contacts**: Multiple contact management with priority designation
+- **Document Storage**: Secure file upload and management for employee documents
+- **Manager-Employee Relationships**: Hierarchical reporting structure with automatic workflow routing
+- **Employment History Tracking**: Complete job progression and role change history
 
-### Attendance System
-- **Punch In/Out**: Single daily entry system
-- **Geolocation Tracking**: GPS coordinates and IP address logging
-- **Work Mode Detection**: Automatic onsite/offsite determination
+### Attendance & Time Tracking
+- **Daily Punch-in/Punch-out**: Single daily entry system with onsite/offsite detection
+- **Geolocation Tracking**: GPS coordinates and IP address logging for location verification
+- **Work Mode Detection**: Automatic onsite/offsite determination based on location
+- **Work Hours Calculation**: Automatic calculation of total working hours and overtime
 - **Attendance Calendar**: Visual calendar view for employees and admins
 - **Duplicate Prevention**: System prevents double punching and backdating
+- **Comprehensive Reporting**: Detailed attendance reports with export functionality
 
 ### Leave Management
-- **Leave Types**: Sick, Casual, Earned, Optional Holiday
-- **Balance Tracking**: Automatic calculation of leave balances
-- **Approval Workflow**: Pending → Approved/Rejected status flow
+- **Multiple Leave Types**: Sick, Casual, Earned, Optional Holiday with configurable policies
+- **Advanced Balance Tracking**: Automatic calculation with carry-forward and encashment rules
+- **Hierarchical Approval Workflow**: Manager and admin approval routing
 - **Document Attachments**: Support for leave supporting documents
 - **Email Notifications**: Automated status update notifications
+- **Holiday Calendar Management**: Company-wide holiday planning and optional holiday selection
 
-### Administrative Features
-- **Employee Management**: Add, edit, view employee records
-- **Attendance Oversight**: Daily attendance monitoring and reports
-- **Leave Approval**: Centralized leave request management
-- **Holiday Management**: Company holiday calendar maintenance
-- **Reports Generation**: CSV export for attendance and leave data
+### Recruitment & Onboarding
+- **Job Posting Management**: Create, publish, and manage job openings
+- **Application Tracking**: Complete applicant lifecycle management
+- **Interview Scheduling**: Multi-round interview coordination with feedback collection
+- **Resume Management**: Secure resume storage and retrieval
+- **Public Job Portal**: Candidate-facing job application interface
+- **Onboarding Workflows**: New hire process management with checklist tracking
+
+### Training & Development
+- **Training Program Management**: Create and manage comprehensive training programs
+- **Enrollment System**: Employee self-enrollment with capacity management
+- **Progress Tracking**: Monitor training completion and scores
+- **Certification Management**: Employee certification tracking with expiry monitoring
+- **Training Reports**: Analytics on training effectiveness and completion rates
+- **Category-based Organization**: Technical, soft-skills, compliance, and leadership training
+
+### Employee Self-Service Portal
+- **Profile Management**: Employee self-service profile updates
+- **Leave Applications**: Online leave request submission with balance viewing
+- **Document Access**: Personal document viewing and download
+- **Policy Acknowledgment**: Digital policy reading and acknowledgment tracking
+- **Announcements**: Company-wide and targeted communication
+- **Emergency Contact Management**: Self-service contact information updates
+
+### Exit & Offboarding
+- **Resignation Management**: Digital resignation submission and approval workflow
+- **Exit Interview System**: Structured exit interview process with feedback collection
+- **Notice Period Tracking**: Automatic calculation and monitoring
+- **Final Settlement Process**: Comprehensive offboarding workflow
+- **Analytics**: Exit trends and feedback analysis for retention insights
+
+### HR Analytics & Reports
+- **Comprehensive Dashboards**: Headcount, attendance, leave, and attrition analytics
+- **Multi-format Export**: Excel, PDF, and CSV export capabilities
+- **Custom Report Generation**: Flexible reporting with date range and filter options
+- **Trend Analysis**: Historical data visualization and trend identification
+- **Department-wise Analytics**: Segmented reporting for organizational insights
+
+### Compliance & Policy Management
+- **Policy Document Management**: Centralized policy storage and version control
+- **Digital Acknowledgment Tracking**: Employee policy reading confirmation
+- **Compliance Monitoring**: Automated tracking of policy acknowledgments
+- **Audit Trail**: Complete activity logging for compliance requirements
+
+### Notifications & Alerts
+- **Email Notifications**: Automated alerts for approvals, reminders, and status updates
+- **Targeted Announcements**: Role-based and department-specific communications
+- **Birthday & Anniversary Tracking**: Automated celebration reminders
+- **Policy Update Alerts**: Notification system for new policy requirements
 
 ## Data Flow
 
@@ -132,6 +179,13 @@ This is a comprehensive Human Resource Management System (HRMS) built with Flask
 - **Host Configuration**: Bound to all interfaces (0.0.0.0) for container compatibility
 
 ## Changelog
+- July 02, 2025. Successfully completed comprehensive HRMS expansion with enterprise-grade features
+- July 02, 2025. Implemented complete recruitment module with job posting, application tracking, and interview management
+- July 02, 2025. Added comprehensive training and development system with certification tracking
+- July 02, 2025. Built complete exit management system with resignation workflow and exit interviews
+- July 02, 2025. Created extensive employee self-service portal with policy management and announcements
+- July 02, 2025. Enhanced navigation structure with organized dropdown menus for all modules
+- July 02, 2025. Extended database schema with 13 new models covering all HR processes
 - July 02, 2025. Successfully migrated project from Replit Agent to standard Replit environment
 - July 02, 2025. Created comprehensive UI templates for employee import and leave report functionality
 - July 02, 2025. Fixed SQLAlchemy compatibility warnings for Replit environment

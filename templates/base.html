@@ -34,28 +34,91 @@
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.employees') }}">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-users me-1"></i>Employees
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.employees') }}">
+                                    <i class="fas fa-list me-2"></i>All Employees
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.add_employee') }}">
+                                    <i class="fas fa-user-plus me-2"></i>Add Employee
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('reports.import_employees') }}">
+                                    <i class="fas fa-file-import me-2"></i>Import Employees
+                                </a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.attendance') }}">
-                                <i class="fas fa-clock me-1"></i>Attendance
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-briefcase me-1"></i>Recruitment
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('recruitment.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('recruitment.jobs') }}">
+                                    <i class="fas fa-briefcase me-2"></i>Job Postings
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('recruitment.add_job') }}">
+                                    <i class="fas fa-plus me-2"></i>Add Job Posting
+                                </a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.leaves') }}">
-                                <i class="fas fa-calendar-alt me-1"></i>Leaves
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-graduation-cap me-1"></i>Training
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('training.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('training.programs') }}">
+                                    <i class="fas fa-book me-2"></i>Programs
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('training.add_program') }}">
+                                    <i class="fas fa-plus me-2"></i>Add Program
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('training.training_reports') }}">
+                                    <i class="fas fa-chart-bar me-2"></i>Reports
+                                </a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.holidays') }}">
-                                <i class="fas fa-gift me-1"></i>Holidays
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-clock me-1"></i>Attendance & Leave
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.attendance') }}">
+                                    <i class="fas fa-clock me-2"></i>Attendance
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.leaves') }}">
+                                    <i class="fas fa-calendar-alt me-2"></i>Leave Requests
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.holidays') }}">
+                                    <i class="fas fa-gift me-2"></i>Holidays
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-sign-out-alt me-1"></i>Exit Management
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('exit_management.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('exit_management.exit_requests') }}">
+                                    <i class="fas fa-list me-2"></i>Exit Requests
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('exit_management.exit_analytics') }}">
+                                    <i class="fas fa-chart-line me-2"></i>Analytics
+                                </a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.reports') }}">
+                            <a class="nav-link" href="{{ url_for('reports.index') }}">
                                 <i class="fas fa-chart-bar me-1"></i>Reports
                             </a>
                         </li>
@@ -65,26 +128,89 @@
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('employee.attendance') }}">
-                                <i class="fas fa-clock me-1"></i>My Attendance
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-clock me-1"></i>Attendance & Leave
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('employee.attendance') }}">
+                                    <i class="fas fa-clock me-2"></i>My Attendance
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('employee.leave_request') }}">
+                                    <i class="fas fa-calendar-plus me-2"></i>Request Leave
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('employee.leave_history') }}">
+                                    <i class="fas fa-history me-2"></i>Leave History
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('self_service.leave_balance') }}">
+                                    <i class="fas fa-calculator me-2"></i>Leave Balance
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-graduation-cap me-1"></i>Training
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('training.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>My Training
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('training.my_certifications') }}">
+                                    <i class="fas fa-certificate me-2"></i>My Certifications
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('training.add_certification') }}">
+                                    <i class="fas fa-plus me-2"></i>Add Certification
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-cog me-1"></i>Self Service
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('self_service.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Self Service Home
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('employee.profile') }}">
+                                    <i class="fas fa-user me-2"></i>My Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('self_service.emergency_contacts') }}">
+                                    <i class="fas fa-phone me-2"></i>Emergency Contacts
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('self_service.policies') }}">
+                                    <i class="fas fa-file-contract me-2"></i>Company Policies
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('self_service.announcements') }}">
+                                    <i class="fas fa-bullhorn me-2"></i>Announcements
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('self_service.my_documents') }}">
+                                    <i class="fas fa-folder me-2"></i>My Documents
+                                </a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('employee.leave_request') }}">
-                                <i class="fas fa-calendar-plus me-1"></i>Request Leave
+                            <a class="nav-link" href="{{ url_for('exit_management.dashboard') }}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Exit Request
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('employee.leave_history') }}">
-                                <i class="fas fa-history me-1"></i>Leave History
+                        {% if current_user.is_manager %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-users-cog me-1"></i>My Team
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('manager.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Team Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('manager.team_leaves') }}">
+                                    <i class="fas fa-calendar-alt me-2"></i>Team Leaves
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('manager.team_attendance') }}">
+                                    <i class="fas fa-clock me-2"></i>Team Attendance
+                                </a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('employee.profile') }}">
-                                <i class="fas fa-user me-1"></i>Profile
-                            </a>
-                        </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
                 
