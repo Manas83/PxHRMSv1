@@ -223,25 +223,15 @@ def leave_request():
         flash('Leave request submitted successfully.', 'success')
         return redirect(url_for('employee.leave_history'))
     
-    # Get available leave types based on employee status
-    from models import LeavePolicy
-    available_policies = LeavePolicy.query.filter_by(
-        employee_status=current_user.employee_status,
-        is_active=True
-    ).all()
-    
     # Get leave balances for display
-    leave_balances = {}
-    for policy in available_policies:
-        leave_balances[policy.leave_type] = {
-            'balance': current_user.get_leave_balance(policy.leave_type),
-            'display_name': policy.leave_type_display,
-            'allocation': policy.annual_allocation
-        }
+    leave_balances = {
+        'sick': current_user.get_leave_balance('sick'),
+        'casual': current_user.get_leave_balance('casual'),
+        'earned': current_user.get_leave_balance('earned'),
+        'optional': current_user.get_leave_balance('optional')
+    }
     
-    return render_template('employee/leave_request.html', 
-                         leave_balances=leave_balances,
-                         available_policies=available_policies)
+    return render_template('employee/leave_request.html', leave_balances=leave_balances)
 
 @employee_bp.route('/leave/history')
 @login_required

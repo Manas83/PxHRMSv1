@@ -4,9 +4,9 @@ from datetime import datetime, date, timedelta
 from models import db, ExitRequest, ExitInterview, User
 from routes.admin import admin_required
 
-exit_management_bp = Blueprint('exit_management', __name__, url_prefix='/exit')
+exit_bp = Blueprint('exit_management', __name__, url_prefix='/exit')
 
-@exit_management_bp.route('/')
+@exit_bp.route('/')
 @login_required
 def dashboard():
     """Exit management dashboard"""
@@ -38,7 +38,7 @@ def dashboard():
         my_exit_request = ExitRequest.query.filter_by(user_id=current_user.id).first()
         return render_template('exit/employee_dashboard.html', my_exit_request=my_exit_request)
 
-@exit_management_bp.route('/request', methods=['GET', 'POST'])
+@exit_bp.route('/request', methods=['GET', 'POST'])
 @login_required
 def submit_resignation():
     """Submit resignation request"""
@@ -76,7 +76,7 @@ def submit_resignation():
     
     return render_template('exit/submit_resignation.html')
 
-@exit_management_bp.route('/requests')
+@exit_bp.route('/requests')
 @login_required
 @admin_required
 def exit_requests():
@@ -87,7 +87,7 @@ def exit_requests():
     
     return render_template('exit/exit_requests.html', exit_requests=requests)
 
-@exit_management_bp.route('/requests/<int:request_id>')
+@exit_bp.route('/requests/<int:request_id>')
 @login_required
 @admin_required
 def view_exit_request(request_id):
@@ -99,7 +99,7 @@ def view_exit_request(request_id):
                          exit_request=exit_request, 
                          exit_interview=exit_interview)
 
-@exit_management_bp.route('/requests/<int:request_id>/review', methods=['POST'])
+@exit_bp.route('/requests/<int:request_id>/review', methods=['POST'])
 @login_required
 @admin_required
 def review_exit_request(request_id):
@@ -123,7 +123,7 @@ def review_exit_request(request_id):
     
     return redirect(url_for('exit_management.view_exit_request', request_id=request_id))
 
-@exit_management_bp.route('/interviews/<int:request_id>', methods=['GET', 'POST'])
+@exit_bp.route('/interviews/<int:request_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def conduct_exit_interview(request_id):
@@ -169,7 +169,7 @@ def conduct_exit_interview(request_id):
                          exit_request=exit_request, 
                          existing_interview=existing_interview)
 
-@exit_management_bp.route('/analytics')
+@exit_bp.route('/analytics')
 @login_required
 @admin_required
 def exit_analytics():

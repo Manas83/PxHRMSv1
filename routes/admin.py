@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from functools import wraps
-from models import User, Attendance, LeaveRequest, Holiday, Document, Designation
+from models import User, Attendance, LeaveRequest, Holiday, Document
 from extensions import db
 from werkzeug.security import generate_password_hash
 from utils.email import send_onboarding_email
@@ -84,11 +84,6 @@ def add_employee():
         manager_id = request.form.get('manager_id')
         manager_id = int(manager_id) if manager_id and manager_id != '' else None
         
-        # Get training end date if provided
-        training_end_date = None
-        if request.form.get('training_end_date'):
-            training_end_date = datetime.strptime(request.form.get('training_end_date'), '%Y-%m-%d').date()
-        
         employee = User(
             email=request.form.get('email'),
             employee_id=request.form.get('employee_id'),
@@ -96,10 +91,8 @@ def add_employee():
             last_name=request.form.get('last_name'),
             phone=request.form.get('phone'),
             department=request.form.get('department'),
-            designation_id=int(request.form.get('designation_id')),
+            designation=request.form.get('designation'),
             work_mode=request.form.get('work_mode'),
-            employee_status=request.form.get('employee_status'),
-            training_end_date=training_end_date,
             role=request.form.get('role', 'employee'),
             manager_id=manager_id,
             password_hash=generate_password_hash(temp_password),
@@ -119,16 +112,13 @@ def add_employee():
             db.session.rollback()
             flash(f'Error adding employee: {str(e)}', 'danger')
     
-    # Get available managers and designations for the dropdown
+    # Get available managers for the dropdown
     managers = User.query.filter(
         User.role.in_(['admin', 'manager']),
         User.active == True
     ).all()
     
-    from models import Designation
-    designations = Designation.query.filter_by(is_active=True).order_by(Designation.department, Designation.name).all()
-    
-    return render_template('admin/add_employee.html', managers=managers, designations=designations)
+    return render_template('admin/add_employee.html', managers=managers)
 
 @admin_bp.route('/employees/<int:emp_id>/toggle-status')
 @login_required
