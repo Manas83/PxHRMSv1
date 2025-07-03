@@ -132,6 +132,34 @@ def toggle_employee_status(emp_id):
     flash(f'Employee {employee.full_name} has been {status}.', 'success')
     return redirect(url_for('admin.employees'))
 
+@admin_bp.route('/employees/<int:emp_id>/set-password', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def set_employee_password(emp_id):
+    employee = User.query.get_or_404(emp_id)
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not new_password or len(new_password) < 6:
+            flash('Password must be at least 6 characters long.', 'danger')
+            return render_template('admin/set_password.html', employee=employee)
+        
+        if new_password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('admin/set_password.html', employee=employee)
+        
+        employee.password_hash = generate_password_hash(new_password)
+        employee.reset_token = None
+        employee.reset_token_expires = None
+        db.session.commit()
+        
+        flash(f'Password updated successfully for {employee.full_name}.', 'success')
+        return redirect(url_for('admin.employees'))
+    
+    return render_template('admin/set_password.html', employee=employee)
+
 @admin_bp.route('/leaves')
 @login_required
 @admin_required
