@@ -452,7 +452,7 @@ class Designation(db.Model):
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationship
-    creator = db.relationship('User', backref='created_designations', lazy=True)
+    creator = db.relationship('User', foreign_keys=[created_by], backref='created_designations', lazy=True)
 
 # Department Management
 class Department(db.Model):
