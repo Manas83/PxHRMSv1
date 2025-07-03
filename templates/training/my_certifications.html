@@ -1,0 +1,86 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Certifications{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-certificate me-2"></i>My Certifications</h2>
+                    <p class="text-muted">View and manage your professional certifications</p>
+                </div>
+                <a href="{{ url_for('training.add_certification') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add Certification
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if certifications %}
+            {% for cert in certifications %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ cert.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ cert.issuing_organization }}</h6>
+                        
+                        <div class="mb-3">
+                            <small class="text-success">
+                                <i class="fas fa-calendar me-1"></i>
+                                <strong>Issued:</strong> {{ cert.issue_date.strftime('%B %d, %Y') }}
+                            </small>
+                        </div>
+
+                        {% if cert.expiry_date %}
+                        <div class="mb-3">
+                            <small class="{% if cert.expiry_date < date.today() %}text-danger{% elif (cert.expiry_date - date.today()).days < 90 %}text-warning{% else %}text-info{% endif %}">
+                                <i class="fas fa-calendar-times me-1"></i>
+                                <strong>Expires:</strong> {{ cert.expiry_date.strftime('%B %d, %Y') }}
+                                {% if cert.expiry_date < date.today() %}
+                                    <span class="badge bg-danger ms-1">Expired</span>
+                                {% elif (cert.expiry_date - date.today()).days < 90 %}
+                                    <span class="badge bg-warning ms-1">Expiring Soon</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        {% if cert.certificate_number %}
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-id-card me-1"></i>
+                                <strong>Certificate #:</strong> {{ cert.certificate_number }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-certificate fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Certifications</h4>
+                    <p class="text-muted">Start building your professional profile by adding your certifications.</p>
+                    <a href="{{ url_for('training.add_certification') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add First Certification
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{{ url_for('training.dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Training Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

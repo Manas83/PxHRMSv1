@@ -1,0 +1,158 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Training{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-graduation-cap me-2"></i>My Training</h2>
+            <p class="text-muted">Track your training progress and certifications</p>
+        </div>
+    </div>
+
+    <!-- My Enrollments -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-book-open me-2"></i>My Enrollments</h5>
+                </div>
+                <div class="card-body">
+                    {% if my_enrollments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Program</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Enrollment Date</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enrollment in my_enrollments %}
+                                    <tr>
+                                        <td>{{ enrollment.training_program.name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ enrollment.training_program.category }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if enrollment.status == 'completed' %}bg-success{% elif enrollment.status == 'in_progress' %}bg-warning{% else %}bg-info{% endif %}">
+                                                {{ enrollment.status.replace('_', ' ').title() }}
+                                            </span>
+                                        </td>
+                                        <td>{{ enrollment.enrollment_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            {% if enrollment.score %}
+                                                {{ enrollment.score }}%
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">You are not enrolled in any training programs yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- My Certifications -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>My Certifications</h5>
+                    <a href="{{ url_for('training.add_certification') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if my_certifications %}
+                        {% for cert in my_certifications %}
+                        <div class="mb-3 p-3 border rounded">
+                            <h6 class="mb-1">{{ cert.name }}</h6>
+                            <small class="text-muted">{{ cert.issuing_organization }}</small>
+                            <div class="mt-2">
+                                <small class="text-success">
+                                    <i class="fas fa-calendar me-1"></i>{{ cert.issue_date.strftime('%Y-%m-%d') }}
+                                </small>
+                                {% if cert.expiry_date %}
+                                <br>
+                                <small class="text-warning">
+                                    <i class="fas fa-calendar-times me-1"></i>Expires: {{ cert.expiry_date.strftime('%Y-%m-%d') }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <a href="{{ url_for('training.my_certifications') }}" class="btn btn-outline-primary btn-sm w-100">
+                            View All Certifications
+                        </a>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-certificate fa-2x text-muted mb-2"></i>
+                            <p class="text-muted small">No certifications added yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Programs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Available Training Programs</h5>
+                </div>
+                <div class="card-body">
+                    {% if available_programs %}
+                        <div class="row">
+                            {% for program in available_programs %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ program.name }}</h6>
+                                        <p class="card-text small">{{ program.description[:100] }}{% if program.description|length > 100 %}...{% endif %}</p>
+                                        <div class="mb-2">
+                                            <span class="badge bg-secondary">{{ program.category }}</span>
+                                            <span class="badge bg-info">{{ program.duration_hours }}h</span>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>{{ program.start_date.strftime('%Y-%m-%d') }}
+                                            </small>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('training.enroll_program', program_id=program.id) }}">
+                                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                <i class="fas fa-user-plus me-1"></i>Enroll
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No training programs available at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

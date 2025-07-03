@@ -1,0 +1,141 @@
+
+{% extends "base.html" %}
+
+{% block title %}Training Dashboard - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-graduation-cap me-2"></i>Training Dashboard</h2>
+            <p class="text-muted">Manage training programs and track employee progress</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ active_programs }}</h4>
+                            <p class="mb-0">Active Programs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ total_enrollments }}</h4>
+                            <p class="mb-0">Total Enrollments</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ completed_trainings }}</h4>
+                            <p class="mb-0">Completed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ (total_enrollments - completed_trainings) if total_enrollments else 0 }}</h4>
+                            <p class="mb-0">In Progress</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Programs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Training Programs</h5>
+                    <a href="{{ url_for('training.add_program') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add Program
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_programs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Program Name</th>
+                                        <th>Category</th>
+                                        <th>Duration</th>
+                                        <th>Start Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for program in recent_programs %}
+                                    <tr>
+                                        <td>{{ program.name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ program.category }}</span>
+                                        </td>
+                                        <td>{{ program.duration_hours }} hours</td>
+                                        <td>{{ program.start_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <span class="badge {% if program.status == 'active' %}bg-success{% elif program.status == 'completed' %}bg-info{% else %}bg-secondary{% endif %}">
+                                                {{ program.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('training.program_details', program_id=program.id) }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No training programs found.</p>
+                            <a href="{{ url_for('training.add_program') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Create First Program
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

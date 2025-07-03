@@ -1,0 +1,200 @@
+
+{% extends "base.html" %}
+
+{% block title %}Training Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-chart-bar me-2"></i>Training Reports</h2>
+            <p class="text-muted">Analytics and insights for training programs</p>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ total_programs }}</h4>
+                            <p class="mb-0">Total Programs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ active_programs }}</h4>
+                            <p class="mb-0">Active Programs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-play-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ total_enrollments }}</h4>
+                            <p class="mb-0">Total Enrollments</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ completed_enrollments }}</h4>
+                            <p class="mb-0">Completed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Category Statistics -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Training by Category</h5>
+                </div>
+                <div class="card-body">
+                    {% if category_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Programs</th>
+                                        <th>Enrollments</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for category, program_count, enrollment_count in category_stats %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ category or 'Unknown' }}</span>
+                                        </td>
+                                        <td>{{ program_count }}</td>
+                                        <td>{{ enrollment_count or 0 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No category data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Rate -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-percentage me-2"></i>Completion Rate</h5>
+                </div>
+                <div class="card-body">
+                    {% set completion_rate = (completed_enrollments / total_enrollments * 100) if total_enrollments else 0 %}
+                    <div class="text-center">
+                        <div class="display-4 mb-3">{{ "%.1f"|format(completion_rate) }}%</div>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ completion_rate }}%"></div>
+                        </div>
+                        <p class="text-muted">
+                            {{ completed_enrollments }} out of {{ total_enrollments }} enrollments completed
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Completions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Completions</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_completions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Program</th>
+                                        <th>Category</th>
+                                        <th>Completion Date</th>
+                                        <th>Score</th>
+                                        <th>Certificate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enrollment, program, user in recent_completions %}
+                                    <tr>
+                                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                        <td>{{ program.name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ program.category }}</span>
+                                        </td>
+                                        <td>{{ enrollment.completion_date.strftime('%Y-%m-%d') if enrollment.completion_date else '-' }}</td>
+                                        <td>
+                                            {% if enrollment.score %}
+                                                {{ enrollment.score }}%
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if enrollment.certificate_issued %}
+                                                <span class="badge bg-success">Yes</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">No</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No recent completions to display.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

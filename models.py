@@ -273,7 +273,32 @@ class TrainingProgram(db.Model):
     # Relationship
     enrollments = db.relationship('TrainingEnrollment', backref='training_program', lazy=True)
 
-# Training Enrollment
+class TrainingEnrollment(db.Model):
+    __tablename__ = 'training_enrollments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    training_program_id = db.Column(db.Integer, db.ForeignKey('training_programs.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    enrollment_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='enrolled')  # enrolled/in_progress/completed/dropped
+    completion_date = db.Column(db.DateTime)
+    score = db.Column(db.Float)  # 0-100
+    feedback = db.Column(db.Text)
+    certificate_issued = db.Column(db.Boolean, default=False)
+
+# Employee Certifications
+class Certification(db.Model):
+    __tablename__ = 'certifications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    issuing_organization = db.Column(db.String(200), nullable=False)
+    issue_date = db.Column(db.Date, nullable=False)
+    expiry_date = db.Column(db.Date)
+    certificate_number = db.Column(db.String(100))
+    is_active = db.Column(db.Boolean, default=True)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
 class TrainingEnrollment(db.Model):
     __tablename__ = 'training_enrollments'
     
