@@ -511,6 +511,7 @@ def process_employee_import(df):
                 designation=row['designation'],
                 work_mode=row.get('work_mode', 'onsite'),
                 role=row.get('role', 'employee'),
+                employment_status=row.get('employment_status', 'probation'),
                 manager_id=manager.id if manager else None,
                 active=True
             )

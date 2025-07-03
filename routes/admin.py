@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from functools import wraps
-from models import User, Attendance, LeaveRequest, Holiday, Document
+from models import User, Attendance, LeaveRequest, Holiday, Document, LeavePolicy
 from extensions import db
 from werkzeug.security import generate_password_hash
 from utils.email import send_onboarding_email
@@ -93,6 +93,8 @@ def add_employee():
             department=request.form.get('department'),
             designation=request.form.get('designation'),
             work_mode=request.form.get('work_mode'),
+            employment_status=request.form.get('employment_status', 'probation'),
+            probation_end_date=datetime.strptime(request.form.get('probation_end_date'), '%Y-%m-%d').date() if request.form.get('probation_end_date') else None,
             role=request.form.get('role', 'employee'),
             manager_id=manager_id,
             password_hash=generate_password_hash(temp_password),
@@ -314,3 +316,101 @@ def download_attendance_report():
     response.headers['Content-Disposition'] = f'attachment; filename=attendance_report_{start_date}_to_{end_date}.csv'
     
     return response
+
+# Leave Policy Management Routes
+@admin_bp.route('/leave-policies')
+@login_required
+@admin_required
+def leave_policies():
+    """View and manage leave policies"""
+    policies = LeavePolicy.query.order_by(LeavePolicy.employment_status, LeavePolicy.leave_type).all()
+    return render_template('admin/leave_policies.html', policies=policies)
+
+@admin_bp.route('/leave-policy/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_leave_policy():
+    """Add new leave policy"""
+    if request.method == 'POST':
+        try:
+            policy = LeavePolicy(
+                leave_type=request.form.get('leave_type'),
+                leave_type_display_name=request.form.get('leave_type_display_name'),
+                employment_status=request.form.get('employment_status'),
+                annual_allocation=int(request.form.get('annual_allocation')),
+                max_encashable=int(request.form.get('max_encashable', 0)),
+                carry_forward_limit=int(request.form.get('carry_forward_limit', 0)),
+                min_service_months=int(request.form.get('min_service_months', 0)),
+                created_by=current_user.id
+            )
+            db.session.add(policy)
+            db.session.commit()
+            flash('Leave policy added successfully!', 'success')
+            return redirect(url_for('admin.leave_policies'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding leave policy: {str(e)}', 'danger')
+    
+    return render_template('admin/add_leave_policy.html')
+
+@admin_bp.route('/leave-policy/edit/<int:policy_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_leave_policy(policy_id):
+    """Edit existing leave policy"""
+    policy = LeavePolicy.query.get_or_404(policy_id)
+    
+    if request.method == 'POST':
+        try:
+            policy.leave_type = request.form.get('leave_type')
+            policy.leave_type_display_name = request.form.get('leave_type_display_name')
+            policy.employment_status = request.form.get('employment_status')
+            policy.annual_allocation = int(request.form.get('annual_allocation'))
+            policy.max_encashable = int(request.form.get('max_encashable', 0))
+            policy.carry_forward_limit = int(request.form.get('carry_forward_limit', 0))
+            policy.min_service_months = int(request.form.get('min_service_months', 0))
+            
+            db.session.commit()
+            flash('Leave policy updated successfully!', 'success')
+            return redirect(url_for('admin.leave_policies'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating leave policy: {str(e)}', 'danger')
+    
+    return render_template('admin/edit_leave_policy.html', policy=policy)
+
+@admin_bp.route('/leave-policy/toggle/<int:policy_id>', methods=['POST'])
+@login_required
+@admin_required
+def toggle_leave_policy(policy_id):
+    """Toggle leave policy active status"""
+    policy = LeavePolicy.query.get_or_404(policy_id)
+    
+    try:
+        policy.is_active = not policy.is_active
+        db.session.commit()
+        
+        status = 'activated' if policy.is_active else 'deactivated'
+        flash(f'Leave policy {status} successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error toggling leave policy: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.leave_policies'))
+
+@admin_bp.route('/leave-policy/delete/<int:policy_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_leave_policy(policy_id):
+    """Delete leave policy"""
+    policy = LeavePolicy.query.get_or_404(policy_id)
+    
+    try:
+        db.session.delete(policy)
+        db.session.commit()
+        flash('Leave policy deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting leave policy: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.leave_policies'))

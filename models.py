@@ -17,6 +17,9 @@ class User(UserMixin, db.Model):
     designation = db.Column(db.String(50), nullable=False)
     work_mode = db.Column(db.String(20), nullable=False, default='onsite')  # onsite/offsite
     role = db.Column(db.String(20), nullable=False, default='employee')  # admin/employee/manager
+    employment_status = db.Column(db.String(20), nullable=False, default='probation')  # probation/confirmed
+    probation_end_date = db.Column(db.Date)
+    confirmation_date = db.Column(db.Date)
     manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     password_hash = db.Column(db.String(256))
     active = db.Column(db.Boolean, default=True)
@@ -88,15 +91,32 @@ class User(UserMixin, db.Model):
         return f"{self.first_name} {self.last_name}"
     
     def get_leave_balance(self, leave_type):
-        """Calculate leave balance for a specific leave type"""
-        # Default annual leave allocation
-        annual_allocation = {
-            'sick': 12,
-            'casual': 12,
-            'earned': 21,
-            'optional': 2
-        }
+        """Calculate leave balance for a specific leave type based on employment status"""
+        # Get applicable leave policy for this user's employment status
+        policy = LeavePolicy.query.filter_by(
+            leave_type=leave_type,
+            employment_status=self.employment_status,
+            is_active=True
+        ).first()
         
+        # If no specific policy, try to get 'all' policy
+        if not policy:
+            policy = LeavePolicy.query.filter_by(
+                leave_type=leave_type,
+                employment_status='all',
+                is_active=True
+            ).first()
+        
+        if not policy:
+            return 0
+        
+        # Check if user meets minimum service requirement
+        if policy.min_service_months > 0:
+            months_service = (datetime.now() - self.date_joined).days // 30
+            if months_service < policy.min_service_months:
+                return 0
+        
+        # Calculate used leaves for current year
         used_leaves = db.session.query(func.sum(LeaveRequest.days_requested)).filter(
             LeaveRequest.user_id == self.id,
             LeaveRequest.leave_type == leave_type,
@@ -104,7 +124,35 @@ class User(UserMixin, db.Model):
             func.extract('year', LeaveRequest.start_date) == datetime.now().year
         ).scalar() or 0
         
-        return annual_allocation.get(leave_type, 0) - used_leaves
+        return policy.annual_allocation - used_leaves
+
+    def get_available_leave_types(self):
+        """Get all available leave types for this user based on employment status"""
+        policies = LeavePolicy.query.filter(
+            db.or_(
+                LeavePolicy.employment_status == self.employment_status,
+                LeavePolicy.employment_status == 'all'
+            ),
+            LeavePolicy.is_active == True
+        ).all()
+        
+        available_types = []
+        for policy in policies:
+            # Check minimum service requirement
+            if policy.min_service_months > 0:
+                months_service = (datetime.now() - self.date_joined).days // 30
+                if months_service < policy.min_service_months:
+                    continue
+            
+            balance = self.get_leave_balance(policy.leave_type)
+            available_types.append({
+                'leave_type': policy.leave_type,
+                'display_name': policy.leave_type_display_name,
+                'balance': balance,
+                'allocation': policy.annual_allocation
+            })
+        
+        return available_types
 
 class Attendance(db.Model):
     __tablename__ = 'attendance'
@@ -176,11 +224,17 @@ class LeavePolicy(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     leave_type = db.Column(db.String(20), nullable=False)
+    leave_type_display_name = db.Column(db.String(100), nullable=False)
+    employment_status = db.Column(db.String(20), nullable=False)  # probation/confirmed/all
     annual_allocation = db.Column(db.Integer, nullable=False)
     max_encashable = db.Column(db.Integer, default=0)
     carry_forward_limit = db.Column(db.Integer, default=0)
+    min_service_months = db.Column(db.Integer, default=0)  # Minimum months of service required
     is_active = db.Column(db.Boolean, default=True)
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    
+    __table_args__ = (db.UniqueConstraint('leave_type', 'employment_status', name='unique_leave_policy'),)
 
 # Emergency Contact Information
 class EmergencyContact(db.Model):

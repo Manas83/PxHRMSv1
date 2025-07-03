@@ -179,6 +179,13 @@ This is a comprehensive, enterprise-grade Human Resource Management System (HRMS
 - **Host Configuration**: Bound to all interfaces (0.0.0.0) for container compatibility
 
 ## Changelog
+- July 03, 2025. Implemented advanced leave management system with employment status-based policies
+- July 03, 2025. Added HR configurable leave types and allocation management
+- July 03, 2025. Enhanced employee models with probation/confirmed status tracking
+- July 03, 2025. Created dynamic leave balance calculation based on employment status
+- July 03, 2025. Built leave policy management interface for HR users
+- July 03, 2025. Updated employee forms and import to handle employment status
+- July 03, 2025. Successfully migrated project to Replit environment with full functionality
 - July 02, 2025. Implemented comprehensive role-based access control with profile-based menu display
 - July 02, 2025. Added role assignment functionality in employee import and add employee features
 - July 02, 2025. Updated navigation to show appropriate menus based on user roles (Employee, Manager, HR, Admin)

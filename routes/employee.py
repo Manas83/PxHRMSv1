@@ -223,15 +223,10 @@ def leave_request():
         flash('Leave request submitted successfully.', 'success')
         return redirect(url_for('employee.leave_history'))
     
-    # Get leave balances for display
-    leave_balances = {
-        'sick': current_user.get_leave_balance('sick'),
-        'casual': current_user.get_leave_balance('casual'),
-        'earned': current_user.get_leave_balance('earned'),
-        'optional': current_user.get_leave_balance('optional')
-    }
+    # Get available leave types based on employment status
+    available_leave_types = current_user.get_available_leave_types()
     
-    return render_template('employee/leave_request.html', leave_balances=leave_balances)
+    return render_template('employee/leave_request.html', available_leave_types=available_leave_types)
 
 @employee_bp.route('/leave/history')
 @login_required

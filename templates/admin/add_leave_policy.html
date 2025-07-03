@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Add Leave Policy - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Add New Leave Policy</h1>
+                <a href="{{ url_for('admin.leave_policies') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Policies
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_type" class="form-label">Leave Type Code *</label>
+                                    <input type="text" class="form-control" id="leave_type" name="leave_type" 
+                                           pattern="[a-z_]+" title="Only lowercase letters and underscores allowed" 
+                                           placeholder="e.g., sick, casual, earned" required>
+                                    <div class="form-text">Use lowercase letters and underscores only (e.g., sick, casual, earned)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_type_display_name" class="form-label">Display Name *</label>
+                                    <input type="text" class="form-control" id="leave_type_display_name" 
+                                           name="leave_type_display_name" placeholder="e.g., Sick Leave, Casual Leave" required>
+                                    <div class="form-text">User-friendly name shown to employees</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="employment_status" class="form-label">Employment Status *</label>
+                                    <select class="form-select" id="employment_status" name="employment_status" required>
+                                        <option value="">Select Employment Status</option>
+                                        <option value="probation">Probation Only</option>
+                                        <option value="confirmed">Confirmed Only</option>
+                                        <option value="all">All Employees</option>
+                                    </select>
+                                    <div class="form-text">Who can use this leave type</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="annual_allocation" class="form-label">Annual Allocation (Days) *</label>
+                                    <input type="number" class="form-control" id="annual_allocation" 
+                                           name="annual_allocation" min="0" max="365" required>
+                                    <div class="form-text">Total days per year for this leave type</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="max_encashable" class="form-label">Max Encashable Days</label>
+                                    <input type="number" class="form-control" id="max_encashable" 
+                                           name="max_encashable" min="0" value="0">
+                                    <div class="form-text">Maximum days that can be encashed</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="carry_forward_limit" class="form-label">Carry Forward Limit</label>
+                                    <input type="number" class="form-control" id="carry_forward_limit" 
+                                           name="carry_forward_limit" min="0" value="0">
+                                    <div class="form-text">Maximum days that can be carried to next year</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="min_service_months" class="form-label">Minimum Service (Months)</label>
+                                    <input type="number" class="form-control" id="min_service_months" 
+                                           name="min_service_months" min="0" value="0">
+                                    <div class="form-text">Minimum months of service required to use this leave</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Policy Rules:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Each combination of leave type and employment status must be unique</li>
+                                        <li>Probation employees typically get limited leave allocations</li>
+                                        <li>Confirmed employees get full leave benefits</li>
+                                        <li>Use "All Employees" for policies that apply regardless of employment status</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Create Policy
+                                </button>
+                                <a href="{{ url_for('admin.leave_policies') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('leave_type').addEventListener('input', function(e) {
+    // Auto-convert to lowercase and replace spaces with underscores
+    e.target.value = e.target.value.toLowerCase().replace(/\s+/g, '_');
+});
+
+document.getElementById('leave_type_display_name').addEventListener('input', function(e) {
+    // Auto-suggest leave type code based on display name
+    const displayName = e.target.value;
+    const leaveTypeField = document.getElementById('leave_type');
+    
+    if (leaveTypeField.value === '' && displayName) {
+        leaveTypeField.value = displayName.toLowerCase().replace(/\s+/g, '_');
+    }
+});
+</script>
+{% endblock %}

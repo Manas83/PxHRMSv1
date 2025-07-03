@@ -13,38 +13,29 @@
                 <div class="card-body">
                     <!-- Leave Balance Display -->
                     <div class="row mb-4">
-                        <div class="col-md-3">
+                        {% for leave_type in available_leave_types %}
+                        <div class="col-md-3 mb-3">
                             <div class="card bg-light text-center">
                                 <div class="card-body py-2">
-                                    <h5 class="text-success mb-1">{{ leave_balances.sick }}</h5>
-                                    <small>Sick Leave</small>
+                                    <h5 class="text-primary mb-1">{{ leave_type.balance }}</h5>
+                                    <small>{{ leave_type.display_name }}</small>
+                                    <div class="text-muted" style="font-size: 0.8em;">
+                                        {{ leave_type.balance }}/{{ leave_type.allocation }} available
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card bg-light text-center">
-                                <div class="card-body py-2">
-                                    <h5 class="text-info mb-1">{{ leave_balances.casual }}</h5>
-                                    <small>Casual Leave</small>
-                                </div>
+                        {% endfor %}
+                        
+                        {% if not available_leave_types %}
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No leave types are currently available for your employment status ({{ current_user.employment_status|title }}). 
+                                Please contact HR for more information.
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card bg-light text-center">
-                                <div class="card-body py-2">
-                                    <h5 class="text-warning mb-1">{{ leave_balances.earned }}</h5>
-                                    <small>Earned Leave</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-light text-center">
-                                <div class="card-body py-2">
-                                    <h5 class="text-secondary mb-1">{{ leave_balances.optional }}</h5>
-                                    <small>Optional Holiday</small>
-                                </div>
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
 
                     <form method="POST" enctype="multipart/form-data">
@@ -54,11 +45,16 @@
                                     <label for="leave_type" class="form-label">Leave Type *</label>
                                     <select class="form-select" id="leave_type" name="leave_type" required>
                                         <option value="">Select Leave Type</option>
-                                        <option value="sick">Sick Leave ({{ leave_balances.sick }} available)</option>
-                                        <option value="casual">Casual Leave ({{ leave_balances.casual }} available)</option>
-                                        <option value="earned">Earned Leave ({{ leave_balances.earned }} available)</option>
-                                        <option value="optional">Optional Holiday ({{ leave_balances.optional }} available)</option>
+                                        {% for leave_type in available_leave_types %}
+                                        <option value="{{ leave_type.leave_type }}" 
+                                                {% if leave_type.balance <= 0 %}disabled{% endif %}>
+                                            {{ leave_type.display_name }} ({{ leave_type.balance }} available)
+                                        </option>
+                                        {% endfor %}
                                     </select>
+                                    {% if not available_leave_types %}
+                                    <div class="form-text text-danger">No leave types are available for your employment status.</div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -160,14 +156,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const daysRequested = parseInt(daysRequestedInput.value);
         
         if (leaveType && daysRequested) {
-            const balances = {
-                'sick': {{ leave_balances.sick }},
-                'casual': {{ leave_balances.casual }},
-                'earned': {{ leave_balances.earned }},
-                'optional': {{ leave_balances.optional }}
+            const leaveBalances = {
+                {% for leave_type in available_leave_types %}
+                '{{ leave_type.leave_type }}': {{ leave_type.balance }},
+                {% endfor %}
             };
             
-            const availableBalance = balances[leaveType];
+            const availableBalance = leaveBalances[leaveType];
             
             if (daysRequested > availableBalance) {
                 submitBtn.disabled = true;
@@ -204,14 +199,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        const balances = {
-            'sick': {{ leave_balances.sick }},
-            'casual': {{ leave_balances.casual }},
-            'earned': {{ leave_balances.earned }},
-            'optional': {{ leave_balances.optional }}
+        const leaveBalances = {
+            {% for leave_type in available_leave_types %}
+            '{{ leave_type.leave_type }}': {{ leave_type.balance }},
+            {% endfor %}
         };
         
-        if (daysRequested > balances[leaveType]) {
+        if (daysRequested > leaveBalances[leaveType]) {
             e.preventDefault();
             alert('You do not have sufficient leave balance for this request.');
             return;

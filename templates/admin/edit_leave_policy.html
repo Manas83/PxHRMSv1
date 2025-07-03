@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Leave Policy - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Edit Leave Policy</h1>
+                <a href="{{ url_for('admin.leave_policies') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Policies
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_type" class="form-label">Leave Type Code *</label>
+                                    <input type="text" class="form-control" id="leave_type" name="leave_type" 
+                                           pattern="[a-z_]+" title="Only lowercase letters and underscores allowed" 
+                                           value="{{ policy.leave_type }}" required>
+                                    <div class="form-text">Use lowercase letters and underscores only</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_type_display_name" class="form-label">Display Name *</label>
+                                    <input type="text" class="form-control" id="leave_type_display_name" 
+                                           name="leave_type_display_name" value="{{ policy.leave_type_display_name }}" required>
+                                    <div class="form-text">User-friendly name shown to employees</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="employment_status" class="form-label">Employment Status *</label>
+                                    <select class="form-select" id="employment_status" name="employment_status" required>
+                                        <option value="">Select Employment Status</option>
+                                        <option value="probation" {{ 'selected' if policy.employment_status == 'probation' }}>Probation Only</option>
+                                        <option value="confirmed" {{ 'selected' if policy.employment_status == 'confirmed' }}>Confirmed Only</option>
+                                        <option value="all" {{ 'selected' if policy.employment_status == 'all' }}>All Employees</option>
+                                    </select>
+                                    <div class="form-text">Who can use this leave type</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="annual_allocation" class="form-label">Annual Allocation (Days) *</label>
+                                    <input type="number" class="form-control" id="annual_allocation" 
+                                           name="annual_allocation" min="0" max="365" value="{{ policy.annual_allocation }}" required>
+                                    <div class="form-text">Total days per year for this leave type</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="max_encashable" class="form-label">Max Encashable Days</label>
+                                    <input type="number" class="form-control" id="max_encashable" 
+                                           name="max_encashable" min="0" value="{{ policy.max_encashable }}">
+                                    <div class="form-text">Maximum days that can be encashed</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="carry_forward_limit" class="form-label">Carry Forward Limit</label>
+                                    <input type="number" class="form-control" id="carry_forward_limit" 
+                                           name="carry_forward_limit" min="0" value="{{ policy.carry_forward_limit }}">
+                                    <div class="form-text">Maximum days that can be carried to next year</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="min_service_months" class="form-label">Minimum Service (Months)</label>
+                                    <input type="number" class="form-control" id="min_service_months" 
+                                           name="min_service_months" min="0" value="{{ policy.min_service_months }}">
+                                    <div class="form-text">Minimum months of service required to use this leave</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Important:</strong> Changes to this policy will affect all employees immediately. 
+                                    Existing leave balances will be recalculated based on the new allocation.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Update Policy
+                                </button>
+                                <a href="{{ url_for('admin.leave_policies') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

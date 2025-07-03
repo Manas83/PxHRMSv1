@@ -97,6 +97,27 @@
                                         <option value="hr">HR</option>
                                         <option value="admin">Admin</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="employment_status" class="form-label">Employment Status *</label>
+                                    <select class="form-select" id="employment_status" name="employment_status" required>
+                                        <option value="">Select Employment Status</option>
+                                        <option value="probation" selected>Probation</option>
+                                        <option value="confirmed">Confirmed</option>
+                                    </select>
+                                    <div class="form-text">New employees usually start on probation</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="probation_end_date" class="form-label">Probation End Date</label>
+                                    <input type="date" class="form-control" id="probation_end_date" name="probation_end_date">
+                                    <div class="form-text">Leave empty if employment status is confirmed</div>
                                     <div class="form-text">Select the user's system access level</div>
                                 </div>
                             </div>
