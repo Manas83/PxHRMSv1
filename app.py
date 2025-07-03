@@ -88,6 +88,21 @@ with app.app_context():
 
     admin_user = User.query.filter_by(email='admin@hrms.com').first()
     if not admin_user:
+        # First ensure we have a default designation
+        from models import Designation
+        admin_designation = Designation.query.filter_by(name='System Administrator').first()
+        if not admin_designation:
+            admin_designation = Designation(
+                name='System Administrator',
+                level=6,
+                department='IT',
+                description='System Administrator role',
+                min_experience_years=0,
+                created_by=1  # Will be updated after admin user is created
+            )
+            db.session.add(admin_designation)
+            db.session.flush()  # Get the ID without committing
+        
         admin_user = User(
             email='admin@hrms.com',
             employee_id='ADMIN001',
@@ -97,9 +112,14 @@ with app.app_context():
             password_hash=generate_password_hash('admin123'),
             active=True,
             department='IT',
-            designation='System Admin',
+            designation_id=admin_designation.id,
             work_mode='onsite'
         )
         db.session.add(admin_user)
         db.session.commit()
+        
+        # Update the designation's created_by to point to the admin user
+        admin_designation.created_by = admin_user.id
+        db.session.commit()
+        
         logging.info("Default admin user created: admin@hrms.com / admin123")

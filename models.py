@@ -37,7 +37,7 @@ class User(UserMixin, db.Model):
     leave_requests = db.relationship('LeaveRequest', foreign_keys='LeaveRequest.user_id', backref='user', lazy=True)
     reviewed_leave_requests = db.relationship('LeaveRequest', foreign_keys='LeaveRequest.reviewed_by', backref='reviewer', lazy=True)
     documents = db.relationship('Document', backref='user', lazy=True)
-    designation_obj = db.relationship('Designation', backref='employees', lazy=True)
+    designation_obj = db.relationship('Designation', foreign_keys=[designation_id], backref='employees', lazy=True)
     
     # Manager-Employee relationships
     reportees = db.relationship('User', backref=db.backref('manager', remote_side='User.id'), lazy=True)
