@@ -61,29 +61,31 @@ from routes.manager import manager_bp
 from routes.reports import reports_bp
 from routes.recruitment import recruitment_bp
 from routes.training import training_bp
-from routes.exit_management import exit_bp
+from routes.exit_management import exit_management_bp
 from routes.self_service import self_service_bp
+from routes.hr_admin import hr_admin_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(employee_bp, url_prefix='/employee')
-app.register_blueprint(manager_bp)
-app.register_blueprint(reports_bp)
-app.register_blueprint(recruitment_bp)
-app.register_blueprint(training_bp)
-app.register_blueprint(exit_bp)
-app.register_blueprint(self_service_bp)
+app.register_blueprint(manager_bp, url_prefix='/manager')
+app.register_blueprint(reports_bp, url_prefix='/reports')
+app.register_blueprint(recruitment_bp, url_prefix='/recruitment')
+app.register_blueprint(training_bp, url_prefix='/training')
+app.register_blueprint(exit_management_bp, url_prefix='/exit')
+app.register_blueprint(self_service_bp, url_prefix='/self-service')
+app.register_blueprint(hr_admin_bp, url_prefix='/hr-admin')
 
 with app.app_context():
     # Import models to ensure tables are created
     import models
     db.create_all()
-    
+
     # Create default admin user if none exists
     from models import User
     from werkzeug.security import generate_password_hash
-    
+
     admin_user = User.query.filter_by(email='admin@hrms.com').first()
     if not admin_user:
         admin_user = User(

@@ -14,9 +14,12 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     phone = db.Column(db.String(15))
     department = db.Column(db.String(50), nullable=False)
-    designation = db.Column(db.String(50), nullable=False)
+    designation_id = db.Column(db.Integer, db.ForeignKey('designations.id'), nullable=False)
     work_mode = db.Column(db.String(20), nullable=False, default='onsite')  # onsite/offsite
     role = db.Column(db.String(20), nullable=False, default='employee')  # admin/employee/manager
+    employee_status = db.Column(db.String(20), nullable=False, default='training')  # training/confirmed/probation
+    confirmation_date = db.Column(db.Date)
+    training_end_date = db.Column(db.Date)
     manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     password_hash = db.Column(db.String(256))
     active = db.Column(db.Boolean, default=True)
@@ -34,6 +37,7 @@ class User(UserMixin, db.Model):
     leave_requests = db.relationship('LeaveRequest', foreign_keys='LeaveRequest.user_id', backref='user', lazy=True)
     reviewed_leave_requests = db.relationship('LeaveRequest', foreign_keys='LeaveRequest.reviewed_by', backref='reviewer', lazy=True)
     documents = db.relationship('Document', backref='user', lazy=True)
+    designation_obj = db.relationship('Designation', backref='employees', lazy=True)
     
     # Manager-Employee relationships
     reportees = db.relationship('User', backref=db.backref('manager', remote_side='User.id'), lazy=True)
@@ -87,15 +91,42 @@ class User(UserMixin, db.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
     
+    @property
+    def designation(self):
+        """Get designation name"""
+        if self.designation_obj:
+            return self.designation_obj.name
+        return 'Unknown'
+    
+    @property
+    def is_confirmed(self):
+        """Check if employee is confirmed"""
+        return self.employee_status == 'confirmed'
+    
+    @property
+    def is_in_training(self):
+        """Check if employee is in training"""
+        return self.employee_status == 'training'
+    
     def get_leave_balance(self, leave_type):
-        """Calculate leave balance for a specific leave type"""
-        # Default annual leave allocation
-        annual_allocation = {
-            'sick': 12,
-            'casual': 12,
-            'earned': 21,
-            'optional': 2
-        }
+        """Calculate leave balance for a specific leave type based on employee status"""
+        # Get applicable leave policy based on employee status
+        policy = LeavePolicy.query.filter_by(
+            leave_type=leave_type,
+            employee_status=self.employee_status,
+            is_active=True
+        ).first()
+        
+        if not policy:
+            # Fallback to default policy
+            policy = LeavePolicy.query.filter_by(
+                leave_type=leave_type,
+                employee_status='confirmed',
+                is_active=True
+            ).first()
+        
+        if not policy:
+            return 0
         
         used_leaves = db.session.query(func.sum(LeaveRequest.days_requested)).filter(
             LeaveRequest.user_id == self.id,
@@ -104,7 +135,7 @@ class User(UserMixin, db.Model):
             func.extract('year', LeaveRequest.start_date) == datetime.now().year
         ).scalar() or 0
         
-        return annual_allocation.get(leave_type, 0) - used_leaves
+        return policy.annual_allocation - used_leaves
 
 class Attendance(db.Model):
     __tablename__ = 'attendance'
@@ -175,12 +206,21 @@ class LeavePolicy(db.Model):
     __tablename__ = 'leave_policies'
     
     id = db.Column(db.Integer, primary_key=True)
-    leave_type = db.Column(db.String(20), nullable=False)
+    leave_type = db.Column(db.String(50), nullable=False)
+    leave_type_display = db.Column(db.String(100), nullable=False)
+    employee_status = db.Column(db.String(20), nullable=False, default='confirmed')  # training/confirmed/probation
     annual_allocation = db.Column(db.Integer, nullable=False)
     max_encashable = db.Column(db.Integer, default=0)
     carry_forward_limit = db.Column(db.Integer, default=0)
+    requires_approval = db.Column(db.Boolean, default=True)
+    min_notice_days = db.Column(db.Integer, default=0)
+    max_consecutive_days = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    creator = db.relationship('User', backref='created_leave_policies', lazy=True)
 
 # Emergency Contact Information
 class EmergencyContact(db.Model):
@@ -394,3 +434,40 @@ class EmploymentHistory(db.Model):
     reason_for_change = db.Column(db.String(200))
     is_current = db.Column(db.Boolean, default=True)
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# Designation Management
+class Designation(db.Model):
+    __tablename__ = 'designations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    level = db.Column(db.Integer, nullable=False)  # 1=entry, 2=junior, 3=senior, 4=lead, 5=manager, 6=director
+    department = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text)
+    min_experience_years = db.Column(db.Integer, default=0)
+    max_experience_years = db.Column(db.Integer)
+    is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    creator = db.relationship('User', backref='created_designations', lazy=True)
+
+# Department Management
+class Department(db.Model):
+    __tablename__ = 'departments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    code = db.Column(db.String(10), nullable=False, unique=True)
+    head_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    description = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    head = db.relationship('User', foreign_keys=[head_id], backref='headed_department', lazy=True)
+    creator = db.relationship('User', foreign_keys=[created_by], backref='created_departments', lazy=True)
+

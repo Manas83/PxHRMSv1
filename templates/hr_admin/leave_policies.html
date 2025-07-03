@@ -1,0 +1,100 @@
+
+{% extends "base.html" %}
+
+{% block title %}Leave Policies - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clipboard-list me-2"></i>Leave Policies Management</h2>
+        <a href="{{ url_for('hr_admin.add_leave_policy') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Leave Policy
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Leave Type</th>
+                            <th>Employee Status</th>
+                            <th>Annual Allocation</th>
+                            <th>Max Encashable</th>
+                            <th>Carry Forward</th>
+                            <th>Min Notice (Days)</th>
+                            <th>Max Consecutive</th>
+                            <th>Requires Approval</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for policy in policies %}
+                        <tr>
+                            <td>
+                                <strong>{{ policy.leave_type_display }}</strong><br>
+                                <small class="text-muted">{{ policy.leave_type }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if policy.employee_status == 'confirmed' else ('warning' if policy.employee_status == 'training' else 'info') }}">
+                                    {{ policy.employee_status|title }}
+                                </span>
+                            </td>
+                            <td>{{ policy.annual_allocation }} days</td>
+                            <td>{{ policy.max_encashable }} days</td>
+                            <td>{{ policy.carry_forward_limit }} days</td>
+                            <td>{{ policy.min_notice_days }} days</td>
+                            <td>{{ policy.max_consecutive_days or 'No limit' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if policy.requires_approval else 'secondary' }}">
+                                    {{ 'Yes' if policy.requires_approval else 'No' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if policy.is_active else 'danger' }}">
+                                    {{ 'Active' if policy.is_active else 'Inactive' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('hr_admin.edit_leave_policy', policy_id=policy.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('hr_admin.toggle_leave_policy', policy_id=policy.id) }}" 
+                                       class="btn btn-sm btn-outline-{{ 'warning' if policy.is_active else 'success' }}"
+                                       onclick="return confirm('Are you sure you want to {{ 'deactivate' if policy.is_active else 'activate' }} this policy?')">
+                                        <i class="fas fa-{{ 'ban' if policy.is_active else 'check' }}"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if not policies %}
+            <div class="text-center py-4">
+                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                <h5>No Leave Policies Found</h5>
+                <p class="text-muted">Start by creating your first leave policy.</p>
+                <a href="{{ url_for('hr_admin.add_leave_policy') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Leave Policy
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <a href="{{ url_for('hr_admin.leave_analytics') }}" class="btn btn-info">
+                <i class="fas fa-chart-bar me-2"></i>Leave Analytics
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
