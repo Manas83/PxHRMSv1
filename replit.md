@@ -179,6 +179,11 @@ This is a comprehensive, enterprise-grade Human Resource Management System (HRMS
 - **Host Configuration**: Bound to all interfaces (0.0.0.0) for container compatibility
 
 ## Changelog
+- July 04, 2025. Added comprehensive employee edit functionality for Admin and HR users
+- July 04, 2025. Created full-featured edit employee interface with all personal, employment, and contact details
+- July 04, 2025. Added Edit button to employee list with proper access control
+- July 04, 2025. Implemented default leave policies creation script for system initialization
+- July 04, 2025. Created test users for different roles with proper role-based access
 - July 03, 2025. Implemented advanced leave management system with employment status-based policies
 - July 03, 2025. Added HR configurable leave types and allocation management
 - July 03, 2025. Enhanced employee models with probation/confirmed status tracking

@@ -134,6 +134,81 @@ def toggle_employee_status(emp_id):
     flash(f'Employee {employee.full_name} has been {status}.', 'success')
     return redirect(url_for('admin.employees'))
 
+@admin_bp.route('/employees/<int:emp_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_employee(emp_id):
+    employee = User.query.get_or_404(emp_id)
+    
+    # Get available managers for dropdown
+    managers = User.query.filter(
+        User.role.in_(['admin', 'hr', 'manager']),
+        User.id != emp_id,  # Don't include the employee being edited
+        User.active == True
+    ).all()
+    
+    if request.method == 'POST':
+        # Personal Information
+        employee.employee_id = request.form.get('employee_id')
+        employee.first_name = request.form.get('first_name')
+        employee.last_name = request.form.get('last_name')
+        employee.email = request.form.get('email')
+        employee.phone = request.form.get('phone')
+        employee.date_of_birth = datetime.strptime(request.form.get('date_of_birth'), '%Y-%m-%d').date() if request.form.get('date_of_birth') else None
+        employee.gender = request.form.get('gender')
+        employee.marital_status = request.form.get('marital_status')
+        employee.nationality = request.form.get('nationality')
+        
+        # Address Information
+        employee.address = request.form.get('address')
+        employee.city = request.form.get('city')
+        employee.state = request.form.get('state')
+        employee.postal_code = request.form.get('postal_code')
+        employee.country = request.form.get('country')
+        
+        # Employment Information
+        employee.department = request.form.get('department')
+        employee.job_title = request.form.get('job_title')
+        employee.hire_date = datetime.strptime(request.form.get('hire_date'), '%Y-%m-%d').date() if request.form.get('hire_date') else None
+        employee.employment_type = request.form.get('employment_type')
+        employee.employment_status = request.form.get('employment_status')
+        
+        # Handle probation end date
+        if request.form.get('probation_end_date'):
+            employee.probation_end_date = datetime.strptime(request.form.get('probation_end_date'), '%Y-%m-%d').date()
+        else:
+            employee.probation_end_date = None
+            
+        employee.salary = float(request.form.get('salary')) if request.form.get('salary') else None
+        employee.role = request.form.get('role')
+        
+        # Manager assignment
+        manager_id = request.form.get('manager_id')
+        employee.manager_id = int(manager_id) if manager_id else None
+        
+        # Emergency Contact
+        employee.emergency_contact_name = request.form.get('emergency_contact_name')
+        employee.emergency_contact_relationship = request.form.get('emergency_contact_relationship')
+        employee.emergency_contact_phone = request.form.get('emergency_contact_phone')
+        
+        # Bank Details
+        employee.bank_account_number = request.form.get('bank_account_number')
+        employee.bank_name = request.form.get('bank_name')
+        employee.bank_ifsc = request.form.get('bank_ifsc')
+        
+        # Status
+        employee.active = request.form.get('active') == 'true'
+        
+        try:
+            db.session.commit()
+            flash(f'Employee {employee.full_name} updated successfully!', 'success')
+            return redirect(url_for('admin.employees'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating employee: {str(e)}', 'danger')
+    
+    return render_template('admin/edit_employee.html', employee=employee, managers=managers)
+
 @admin_bp.route('/employees/<int:emp_id>/set-password', methods=['GET', 'POST'])
 @login_required
 @admin_required

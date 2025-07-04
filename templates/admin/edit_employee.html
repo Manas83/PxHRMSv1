@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Employee - HRMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-user-edit me-2"></i>Edit Employee</h2>
+                <a href="{{ url_for('admin.employees') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Employees
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <!-- Personal Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Personal Information
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="employee_id" class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control" id="employee_id" name="employee_id" 
+                                           value="{{ employee.employee_id or '' }}" required>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="first_name" class="form-label">First Name *</label>
+                                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                                   value="{{ employee.first_name or '' }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="last_name" class="form-label">Last Name *</label>
+                                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                                   value="{{ employee.last_name or '' }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="{{ employee.email or '' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="phone" name="phone" 
+                                           value="{{ employee.phone or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                           value="{{ employee.date_of_birth.strftime('%Y-%m-%d') if employee.date_of_birth else '' }}">
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="gender" class="form-label">Gender</label>
+                                            <select class="form-select" id="gender" name="gender">
+                                                <option value="">Select Gender</option>
+                                                <option value="male" {% if employee.gender == 'male' %}selected{% endif %}>Male</option>
+                                                <option value="female" {% if employee.gender == 'female' %}selected{% endif %}>Female</option>
+                                                <option value="other" {% if employee.gender == 'other' %}selected{% endif %}>Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="marital_status" class="form-label">Marital Status</label>
+                                            <select class="form-select" id="marital_status" name="marital_status">
+                                                <option value="">Select Status</option>
+                                                <option value="single" {% if employee.marital_status == 'single' %}selected{% endif %}>Single</option>
+                                                <option value="married" {% if employee.marital_status == 'married' %}selected{% endif %}>Married</option>
+                                                <option value="divorced" {% if employee.marital_status == 'divorced' %}selected{% endif %}>Divorced</option>
+                                                <option value="widowed" {% if employee.marital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="nationality" class="form-label">Nationality</label>
+                                    <input type="text" class="form-control" id="nationality" name="nationality" 
+                                           value="{{ employee.nationality or '' }}">
+                                </div>
+                            </div>
+                            
+                            <!-- Employment Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-briefcase me-2"></i>Employment Information
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="department" class="form-label">Department</label>
+                                    <input type="text" class="form-control" id="department" name="department" 
+                                           value="{{ employee.department or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Job Title</label>
+                                    <input type="text" class="form-control" id="job_title" name="job_title" 
+                                           value="{{ employee.job_title or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="hire_date" class="form-label">Hire Date</label>
+                                    <input type="date" class="form-control" id="hire_date" name="hire_date" 
+                                           value="{{ employee.hire_date.strftime('%Y-%m-%d') if employee.hire_date else '' }}">
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="employment_type" class="form-label">Employment Type</label>
+                                            <select class="form-select" id="employment_type" name="employment_type">
+                                                <option value="">Select Type</option>
+                                                <option value="full-time" {% if employee.employment_type == 'full-time' %}selected{% endif %}>Full-time</option>
+                                                <option value="part-time" {% if employee.employment_type == 'part-time' %}selected{% endif %}>Part-time</option>
+                                                <option value="contract" {% if employee.employment_type == 'contract' %}selected{% endif %}>Contract</option>
+                                                <option value="internship" {% if employee.employment_type == 'internship' %}selected{% endif %}>Internship</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="employment_status" class="form-label">Employment Status</label>
+                                            <select class="form-select" id="employment_status" name="employment_status">
+                                                <option value="">Select Status</option>
+                                                <option value="probation" {% if employee.employment_status == 'probation' %}selected{% endif %}>Probation</option>
+                                                <option value="confirmed" {% if employee.employment_status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                                <option value="terminated" {% if employee.employment_status == 'terminated' %}selected{% endif %}>Terminated</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="probation_end_date" class="form-label">Probation End Date</label>
+                                    <input type="date" class="form-control" id="probation_end_date" name="probation_end_date" 
+                                           value="{{ employee.probation_end_date.strftime('%Y-%m-%d') if employee.probation_end_date else '' }}">
+                                    <div class="form-text">Only required if employment status is "Probation"</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="salary" class="form-label">Salary</label>
+                                    <input type="number" class="form-control" id="salary" name="salary" step="0.01" 
+                                           value="{{ employee.salary or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="role" class="form-label">Role</label>
+                                    <select class="form-select" id="role" name="role">
+                                        <option value="employee" {% if employee.role == 'employee' %}selected{% endif %}>Employee</option>
+                                        <option value="manager" {% if employee.role == 'manager' %}selected{% endif %}>Manager</option>
+                                        <option value="hr" {% if employee.role == 'hr' %}selected{% endif %}>HR</option>
+                                        <option value="admin" {% if employee.role == 'admin' %}selected{% endif %}>Admin</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="manager_id" class="form-label">Manager</label>
+                                    <select class="form-select" id="manager_id" name="manager_id">
+                                        <option value="">Select Manager</option>
+                                        {% for manager in managers %}
+                                        <option value="{{ manager.id }}" {% if employee.manager_id == manager.id %}selected{% endif %}>
+                                            {{ manager.full_name }} ({{ manager.role.title() }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="row">
+                            <!-- Address Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-home me-2"></i>Address Information
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3">{{ employee.address or '' }}</textarea>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="city" class="form-label">City</label>
+                                            <input type="text" class="form-control" id="city" name="city" 
+                                                   value="{{ employee.city or '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="state" class="form-label">State</label>
+                                            <input type="text" class="form-control" id="state" name="state" 
+                                                   value="{{ employee.state or '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="postal_code" class="form-label">Postal Code</label>
+                                            <input type="text" class="form-control" id="postal_code" name="postal_code" 
+                                                   value="{{ employee.postal_code or '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="country" class="form-label">Country</label>
+                                            <input type="text" class="form-control" id="country" name="country" 
+                                                   value="{{ employee.country or '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact & Emergency Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-phone me-2"></i>Emergency Contact
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="emergency_contact_name" class="form-label">Emergency Contact Name</label>
+                                    <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" 
+                                           value="{{ employee.emergency_contact_name or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="emergency_contact_relationship" class="form-label">Relationship</label>
+                                    <input type="text" class="form-control" id="emergency_contact_relationship" name="emergency_contact_relationship" 
+                                           value="{{ employee.emergency_contact_relationship or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="emergency_contact_phone" class="form-label">Emergency Contact Phone</label>
+                                    <input type="text" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" 
+                                           value="{{ employee.emergency_contact_phone or '' }}">
+                                </div>
+                                
+                                <h5 class="text-primary mb-3 mt-4">
+                                    <i class="fas fa-university me-2"></i>Bank Details
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="bank_account_number" class="form-label">Bank Account Number</label>
+                                    <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" 
+                                           value="{{ employee.bank_account_number or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bank_name" class="form-label">Bank Name</label>
+                                    <input type="text" class="form-control" id="bank_name" name="bank_name" 
+                                           value="{{ employee.bank_name or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bank_ifsc" class="form-label">IFSC Code</label>
+                                    <input type="text" class="form-control" id="bank_ifsc" name="bank_ifsc" 
+                                           value="{{ employee.bank_ifsc or '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Account Status -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-cog me-2"></i>Account Status
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="active" class="form-label">Account Status</label>
+                                    <select class="form-select" id="active" name="active">
+                                        <option value="true" {% if employee.active %}selected{% endif %}>Active</option>
+                                        <option value="false" {% if not employee.active %}selected{% endif %}>Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.employees') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Update Employee
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const employmentStatusSelect = document.getElementById('employment_status');
+    const probationEndDateGroup = document.getElementById('probation_end_date').closest('.mb-3');
+    
+    function toggleProbationDate() {
+        if (employmentStatusSelect.value === 'probation') {
+            probationEndDateGroup.style.display = 'block';
+        } else {
+            probationEndDateGroup.style.display = 'none';
+        }
+    }
+    
+    employmentStatusSelect.addEventListener('change', toggleProbationDate);
+    toggleProbationDate(); // Initialize on page load
+});
+</script>
+{% endblock %}
