@@ -204,23 +204,15 @@ def leave_request():
         
         db.session.commit()
         
-        # Send notification to manager or admin
+        # Send notifications using the new notification system
         try:
-            if current_user.manager:
-                # Send to manager
-                from utils.email import send_leave_notification
-                send_leave_notification(current_user.manager.email, leave_req, 'pending')
-            else:
-                # Send to admin if no manager assigned
-                admin_users = User.query.filter_by(role='admin', active=True).all()
-                if admin_users:
-                    from utils.email import send_leave_notification
-                    send_leave_notification(admin_users[0].email, leave_req, 'pending')
+            from utils.notifications import send_leave_request_notification
+            send_leave_request_notification(leave_req)
         except Exception as e:
-            # Don't fail the request if email fails
-            print(f"Failed to send notification email: {e}")
+            # Don't fail the request if notification fails
+            print(f"Failed to send notification: {e}")
         
-        flash('Leave request submitted successfully.', 'success')
+        flash('Leave request submitted successfully. Your manager and HR have been notified.', 'success')
         return redirect(url_for('employee.leave_history'))
     
     # Get available leave types based on employment status

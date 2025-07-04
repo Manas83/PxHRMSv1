@@ -179,6 +179,11 @@ This is a comprehensive, enterprise-grade Human Resource Management System (HRMS
 - **Host Configuration**: Bound to all interfaces (0.0.0.0) for container compatibility
 
 ## Changelog
+- July 04, 2025. Implemented comprehensive notification system with email alerts and in-app notifications
+- July 04, 2025. Added leave request workflow with automatic notifications to managers and HR
+- July 04, 2025. Created manager approval system with email notifications to employees
+- July 04, 2025. Built notifications dropdown in navigation with real-time unread count
+- July 04, 2025. Enhanced manager dashboard with prominent pending leave alerts
 - July 04, 2025. Added comprehensive employee edit functionality for Admin and HR users
 - July 04, 2025. Created full-featured edit employee interface with all personal, employment, and contact details
 - July 04, 2025. Added Edit button to employee list with proper access control

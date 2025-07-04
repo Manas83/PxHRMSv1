@@ -52,6 +52,22 @@ def load_user(user_id):
     from models import User
     return User.query.get(int(user_id))
 
+# Add context processor for notifications
+@app.context_processor
+def inject_notifications():
+    from flask_login import current_user
+    if current_user.is_authenticated:
+        from utils.notifications import get_unread_notifications
+        unread_notifications = get_unread_notifications(current_user.id)
+        return {
+            'unread_notifications': unread_notifications,
+            'unread_count': len(unread_notifications)
+        }
+    return {
+        'unread_notifications': [],
+        'unread_count': 0
+    }
+
 # Register blueprints
 from routes.main import main_bp
 from routes.auth import auth_bp

@@ -448,3 +448,20 @@ class EmploymentHistory(db.Model):
     reason_for_change = db.Column(db.String(200))
     is_current = db.Column(db.Boolean, default=True)
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Notification(db.Model):
+    """Model for in-app notifications"""
+    __tablename__ = 'notifications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(db.String(50), nullable=False)  # leave_request, leave_approved, leave_rejected, etc.
+    related_id = db.Column(db.Integer)  # ID of related object (leave request, etc.)
+    is_read = db.Column(db.Boolean, default=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('notifications', lazy=True))

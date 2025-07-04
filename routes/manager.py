@@ -99,17 +99,18 @@ def review_leave(leave_id):
         leave_request.status = 'approved' if action == 'approve' else 'rejected'
         leave_request.reviewed_by = current_user.id
         leave_request.reviewed_date = datetime.utcnow()
-        leave_request.admin_comments = comments
+        leave_request.admin_notes = comments
         
         db.session.commit()
         
-        # Send notification email
+        # Send notifications using the new notification system
         try:
-            send_leave_notification(leave_request.user.email, leave_request, leave_request.status)
+            from utils.notifications import send_leave_approval_notification
+            send_leave_approval_notification(leave_request, current_user)
         except Exception as e:
-            print(f"Failed to send email notification: {e}")
+            print(f"Failed to send notification: {e}")
         
-        flash(f'Leave request has been {leave_request.status}.', 'success')
+        flash(f'Leave request has been {leave_request.status}. Notifications sent to employee and HR.', 'success')
     else:
         flash('Invalid action specified.', 'error')
     
