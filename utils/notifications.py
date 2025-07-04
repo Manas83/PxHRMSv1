@@ -40,8 +40,9 @@ def send_leave_request_notification(leave_request):
             )
             
             # Email notification to manager
-            subject = f"Leave Request Approval Required - {employee.full_name}"
-            email_body = f"""
+            try:
+                subject = f"Leave Request Approval Required - {employee.full_name}"
+                email_body = f"""
 Dear {manager.first_name},
 
 {employee.full_name} has submitted a leave request that requires your approval.
@@ -57,8 +58,10 @@ Please log in to the HRMS system to review and approve this request.
 
 Thank you,
 HRMS System
-            """
-            send_email(manager.email, subject, email_body)
+                """
+                send_email(manager.email, subject, email_body)
+            except Exception as e:
+                print(f"Failed to send email to manager {manager.email}: {e}")
     
     # Send copy to all HR users
     hr_users = User.query.filter_by(role='hr', active=True).all()
@@ -73,8 +76,9 @@ HRMS System
         )
         
         # Email notification to HR
-        subject = f"Leave Request Submitted - {employee.full_name}"
-        email_body = f"""
+        try:
+            subject = f"Leave Request Submitted - {employee.full_name}"
+            email_body = f"""
 Dear {hr_user.first_name},
 
 A new leave request has been submitted for your information.
@@ -92,8 +96,10 @@ This is for your information. The request will be processed by the employee's ma
 
 Best regards,
 HRMS System
-        """
-        send_email(hr_user.email, subject, email_body)
+            """
+            send_email(hr_user.email, subject, email_body)
+        except Exception as e:
+            print(f"Failed to send email to HR user {hr_user.email}: {e}")
 
 
 def send_leave_approval_notification(leave_request, approved_by):
@@ -121,8 +127,9 @@ def send_leave_approval_notification(leave_request, approved_by):
     )
     
     # Email notification to employee
-    subject = f"Leave Request {status} - {leave_request.leave_type.title()} Leave"
-    email_body = f"""
+    try:
+        subject = f"Leave Request {status} - {leave_request.leave_type.title()} Leave"
+        email_body = f"""
 Dear {employee.first_name},
 
 Your leave request has been {leave_request.status}.
@@ -135,18 +142,20 @@ Leave Details:
 - Reviewed by: {approved_by.full_name}
 - Review Date: {leave_request.reviewed_date.strftime('%Y-%m-%d %H:%M') if leave_request.reviewed_date else 'N/A'}
 """
-    
-    if leave_request.admin_notes:
-        email_body += f"- Notes: {leave_request.admin_notes}\n"
-    
-    email_body += f"""
+        
+        if leave_request.admin_notes:
+            email_body += f"- Notes: {leave_request.admin_notes}\n"
+        
+        email_body += f"""
 You can view your leave history by logging into the HRMS system.
 
 Best regards,
 HRMS System
-    """
-    
-    send_email(employee.email, subject, email_body)
+        """
+        
+        send_email(employee.email, subject, email_body)
+    except Exception as e:
+        print(f"Failed to send email to employee {employee.email}: {e}")
     
     # Notify HR users about the decision
     hr_users = User.query.filter_by(role='hr', active=True).all()
