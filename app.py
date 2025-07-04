@@ -36,7 +36,14 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Initialize extensions
 db.init_app(app)
 login_manager.init_app(app)
-mail.init_app(app)
+
+# Initialize mail with error handling
+try:
+    mail.init_app(app)
+    logging.info("Mail service initialized successfully")
+except Exception as e:
+    logging.warning(f"Mail service initialization failed: {e}")
+    # Continue without mail service for deployment
 
 # Now import blueprints (AFTER extensions are initialized)
 

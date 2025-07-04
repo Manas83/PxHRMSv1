@@ -6,6 +6,11 @@ import logging
 def send_email(to, subject, template):
     """Send email using Flask-Mail"""
     try:
+        # Check if mail is properly configured
+        if not current_app.config.get('MAIL_USERNAME'):
+            logging.warning(f"Mail not configured - skipping email to {to}")
+            return False
+            
         msg = Message(
             subject=subject,
             recipients=[to],
@@ -14,9 +19,10 @@ def send_email(to, subject, template):
         )
         mail.send(msg)
         logging.info(f"Email sent successfully to {to}")
+        return True
     except Exception as e:
         logging.error(f"Failed to send email to {to}: {e}")
-        raise
+        return False
 
 def send_onboarding_email(email, temp_password, full_name):
     """Send onboarding email with temporary password"""
