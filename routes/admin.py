@@ -11,6 +11,8 @@ import secrets
 import csv
 import io
 import os
+import pandas as pd
+from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -514,3 +516,69 @@ def delete_leave_policy(policy_id):
         flash(f'Error deleting leave policy: {str(e)}', 'danger')
 
     return redirect(url_for('admin.leave_policies'))
+
+@admin_bp.route('/download-sample-template')
+@login_required
+@admin_required
+def download_sample_template():
+    """Download sample employee import template"""
+    # Create sample data
+    sample_data = {
+        'employee_id': ['EMP001', 'EMP002', 'EMP003'],
+        'email': ['john.doe@company.com', 'jane.smith@company.com', 'mike.wilson@company.com'],
+        'first_name': ['John', 'Jane', 'Mike'],
+        'last_name': ['Doe', 'Smith', 'Wilson'],
+        'phone': ['+1234567890', '+1234567891', '+1234567892'],
+        'department': ['Engineering', 'Human Resources', 'Marketing'],
+        'designation': ['Software Developer', 'HR Manager', 'Marketing Specialist'],
+        'work_mode': ['onsite', 'remote', 'hybrid'],
+        'role': ['employee', 'manager', 'employee'],
+        'employment_status': ['confirmed', 'probation', 'confirmed'],
+        'manager_email': ['manager@company.com', '', 'manager@company.com']
+    }
+    
+    # Create DataFrame
+    df = pd.DataFrame(sample_data)
+    
+    # Create Excel file in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Employee_Template', index=False)
+        
+        # Get workbook and worksheet objects
+        workbook = writer.book
+        worksheet = writer.sheets['Employee_Template']
+        
+        # Add data validation for dropdowns
+        employment_status_options = ['probation', 'confirmed', 'notice_period', 'terminated']
+        work_mode_options = ['onsite', 'remote', 'hybrid']
+        role_options = ['employee', 'manager', 'hr', 'admin']
+        
+        # Set column widths
+        worksheet.set_column('A:K', 20)
+        
+        # Add dropdown validation (for rows 2-1000)
+        worksheet.data_validation('H2:H1000', {
+            'validate': 'list',
+            'source': work_mode_options,
+        })
+        
+        worksheet.data_validation('I2:I1000', {
+            'validate': 'list',
+            'source': role_options,
+        })
+        
+        worksheet.data_validation('J2:J1000', {
+            'validate': 'list',
+            'source': employment_status_options,
+        })
+    
+    output.seek(0)
+    
+    # Create response
+    from flask import make_response
+    response = make_response(output.getvalue())
+    response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    response.headers['Content-Disposition'] = 'attachment; filename=employee_import_template.xlsx'
+    
+    return response

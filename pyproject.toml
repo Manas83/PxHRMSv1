@@ -17,4 +17,5 @@ dependencies = [
     "pandas>=2.3.0",
     "xlsxwriter>=3.2.5",
     "sendgrid>=6.12.4",
+    "openpyxl>=3.1.5",
 ]

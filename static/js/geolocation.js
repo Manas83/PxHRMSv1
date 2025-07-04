@@ -76,7 +76,7 @@ class GeolocationHandler {
     updateLocationDisplay(position) {
         const locationElements = document.querySelectorAll('.current-location');
         const coords = position.coords;
-        
+
         locationElements.forEach(element => {
             element.innerHTML = `
                 <i class="fas fa-map-marker-alt me-1"></i>
@@ -121,11 +121,11 @@ class GeolocationHandler {
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
             );
-            
+
             if (!response.ok) {
                 throw new Error('Geocoding service unavailable');
             }
-            
+
             const data = await response.json();
             return data.display_name || 'Address not found';
         } catch (error) {
@@ -151,7 +151,7 @@ const geoHandler = new GeolocationHandler();
 // Punch-in/out with location
 async function punchWithLocation(action) {
     const punchBtn = document.getElementById(action === 'in' ? 'punchInBtn' : 'punchOutBtn');
-    
+
     if (punchBtn) {
         // Show loading state
         const originalContent = punchBtn.innerHTML;
@@ -174,7 +174,7 @@ async function punchWithLocation(action) {
 
         // Send punch request
         const url = action === 'in' ? '/employee/punch-in' : '/employee/punch-out';
-        
+
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -197,7 +197,7 @@ async function punchWithLocation(action) {
 
     } catch (error) {
         console.error('Punch error:', error);
-        
+
         if (window.HRMS) {
             window.HRMS.showNotification(
                 error.message || 'Unable to record attendance. Please try again.',
@@ -206,7 +206,7 @@ async function punchWithLocation(action) {
         } else {
             alert(error.message || 'Unable to record attendance. Please try again.');
         }
-        
+
         // Restore button state
         if (punchBtn) {
             punchBtn.disabled = false;
@@ -224,13 +224,13 @@ document.addEventListener('DOMContentLoaded', function() {
         geoHandler.getCurrentPosition()
             .then(position => {
                 console.log('Initial position obtained:', geoHandler.formatPosition(position));
-                
+
                 // Update any location displays on the page
                 geoHandler.updateLocationDisplay(position);
             })
             .catch(error => {
                 console.warn('Initial geolocation failed:', error.message);
-                
+
                 // Show warning to user
                 const locationWarning = document.querySelector('.location-warning');
                 if (locationWarning) {
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } else {
         console.warn('Geolocation not supported');
-        
+
         // Hide location-dependent features
         const locationElements = document.querySelectorAll('.requires-location');
         locationElements.forEach(element => {
