@@ -148,7 +148,7 @@ class GeolocationHandler {
 // Initialize geolocation handler
 const geoHandler = new GeolocationHandler();
 
-// Punch-in/out with location
+// Punch-in/out with or without location
 async function punchWithLocation(action) {
     const punchBtn = document.getElementById(action === 'in' ? 'punchInBtn' : 'punchOutBtn');
     
@@ -156,21 +156,50 @@ async function punchWithLocation(action) {
         // Show loading state
         const originalContent = punchBtn.innerHTML;
         punchBtn.disabled = true;
-        punchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Getting location...';
+        punchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
     }
 
+    let punchData = {};
+
     try {
-        // Get current position
+        // Try to get current position, but don't fail if unavailable
+        punchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Getting location...';
         const position = await geoHandler.getCurrentPosition();
         const coords = position.coords;
 
-        // Prepare punch data
-        const punchData = {
+        // Prepare punch data with location
+        punchData = {
             latitude: coords.latitude,
             longitude: coords.longitude,
             accuracy: coords.accuracy,
             timestamp: position.timestamp
         };
+
+    } catch (locationError) {
+        console.warn('Location unavailable, proceeding without location:', locationError.message);
+        
+        // Show notification that location is unavailable but punch will proceed
+        if (window.HRMS) {
+            window.HRMS.showNotification(
+                'Location unavailable, recording attendance without location data.',
+                'warning'
+            );
+        }
+        
+        // Proceed without location data
+        punchData = {
+            latitude: null,
+            longitude: null,
+            accuracy: null,
+            timestamp: Date.now()
+        };
+    }
+
+    try {
+        // Update button text
+        if (punchBtn) {
+            punchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Recording...';
+        }
 
         // Send punch request
         const url = action === 'in' ? '/employee/punch-in' : '/employee/punch-out';

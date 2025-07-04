@@ -15,7 +15,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted">Generate detailed attendance reports for employees.</p>
-                    
+
                     <form method="GET" action="{{ url_for('admin.download_attendance_report') }}">
                         <div class="row">
                             <div class="col-md-6">
@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-download me-2"></i>Download CSV
                         </button>
@@ -84,6 +84,20 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Timesheet Export</h5>
+                </div>
+                <div class="card-body">
+                    <p>Advanced timesheet export with employee and department filtering options.</p>
+                    <a href="{{ url_for('admin.timesheet_export') }}" class="btn btn-primary">
+                        <i class="fas fa-file-export me-2"></i>Export Timesheets
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Quick Stats -->
@@ -132,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    
+
     document.getElementById('start_date').value = firstDay.toISOString().split('T')[0];
     document.getElementById('end_date').value = lastDay.toISOString().split('T')[0];
 });

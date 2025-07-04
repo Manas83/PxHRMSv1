@@ -1,0 +1,143 @@
+
+{% extends "base.html" %}
+
+{% block title %}Timesheet Export - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-export me-2"></i>Timesheet Export</h2>
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Reports
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-filter me-2"></i>Export Filters</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('admin.download_attendance_report') }}" method="GET" id="exportForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Department (Optional)</label>
+                        <select class="form-select" id="department" name="department">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept }}">{{ dept }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee Selection</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="employee_selection" id="all_employees" value="all" checked>
+                            <label class="form-check-label" for="all_employees">
+                                All Employees
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="employee_selection" id="selected_employees" value="selected">
+                            <label class="form-check-label" for="selected_employees">
+                                Selected Employees
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3" id="employee_selection_div" style="display: none;">
+                    <div class="col-md-12">
+                        <label class="form-label">Select Employees</label>
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            <div class="row">
+                                {% for employee in employees %}
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input employee-checkbox" type="checkbox" 
+                                               name="employee_ids" value="{{ employee.employee_id }}" 
+                                               id="emp_{{ employee.id }}">
+                                        <label class="form-check-label" for="emp_{{ employee.id }}">
+                                            {{ employee.full_name }} ({{ employee.employee_id }}) - {{ employee.department }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllEmployees()">
+                                Select All
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllEmployees()">
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12 text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-download me-2"></i>Export Timesheet (CSV)
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const allEmployeesRadio = document.getElementById('all_employees');
+    const selectedEmployeesRadio = document.getElementById('selected_employees');
+    const employeeSelectionDiv = document.getElementById('employee_selection_div');
+
+    // Show/hide employee selection based on radio button
+    function toggleEmployeeSelection() {
+        if (selectedEmployeesRadio.checked) {
+            employeeSelectionDiv.style.display = 'block';
+        } else {
+            employeeSelectionDiv.style.display = 'none';
+            // Clear all checkboxes when "All Employees" is selected
+            clearAllEmployees();
+        }
+    }
+
+    allEmployeesRadio.addEventListener('change', toggleEmployeeSelection);
+    selectedEmployeesRadio.addEventListener('change', toggleEmployeeSelection);
+
+    // Set default dates to current month
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    document.getElementById('start_date').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('end_date').value = today.toISOString().split('T')[0];
+});
+
+function selectAllEmployees() {
+    const checkboxes = document.querySelectorAll('.employee-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function clearAllEmployees() {
+    const checkboxes = document.querySelectorAll('.employee-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+</script>
+{% endblock %}

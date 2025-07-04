@@ -349,6 +349,8 @@ def reports():
 def download_attendance_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
+    department = request.args.get('department')
+    employee_ids = request.args.getlist('employee_ids')  # For selected employees
     
     if not start_date or not end_date:
         flash('Please provide both start and end dates.', 'danger')
@@ -357,29 +359,44 @@ def download_attendance_report():
     start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
     end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
     
+    # Build query based on filters
+    query = db.session.query(Attendance, User).join(User).filter(
+        and_(Attendance.date >= start_date, Attendance.date <= end_date)
+    )
+    
+    # Filter by department if specified
+    if department:
+        query = query.filter(User.department == department)
+    
+    # Filter by specific employees if specified
+    if employee_ids:
+        query = query.filter(User.employee_id.in_(employee_ids))
+    
+    attendance_data = query.order_by(User.first_name, Attendance.date).all()
+    
     # Generate CSV report
     output = io.StringIO()
     writer = csv.writer(output)
     
     # Write header
-    writer.writerow(['Employee ID', 'Employee Name', 'Date', 'Punch In', 'Punch Out', 
-                    'Total Hours', 'Work Mode', 'Status'])
-    
-    # Get attendance data
-    attendance_data = db.session.query(Attendance, User).join(User).filter(
-        and_(Attendance.date >= start_date, Attendance.date <= end_date)
-    ).order_by(User.first_name, Attendance.date).all()
+    writer.writerow(['Employee ID', 'Employee Name', 'Department', 'Date', 'Day', 
+                    'Punch In', 'Punch Out', 'Total Hours', 'Work Mode', 'Status', 
+                    'Location Available', 'Punch In IP'])
     
     for attendance, user in attendance_data:
         writer.writerow([
             user.employee_id,
             user.full_name,
+            user.department,
             attendance.date.strftime('%Y-%m-%d'),
+            attendance.date.strftime('%A'),
             attendance.punch_in_time.strftime('%H:%M:%S') if attendance.punch_in_time else '',
             attendance.punch_out_time.strftime('%H:%M:%S') if attendance.punch_out_time else '',
             f"{attendance.total_hours:.2f}" if attendance.total_hours else '0.00',
-            attendance.work_mode_detected or '',
-            attendance.status
+            attendance.work_mode_detected or 'Unknown',
+            attendance.status.title(),
+            'Yes' if attendance.punch_in_location else 'No',
+            attendance.punch_in_ip or ''
         ])
     
     output.seek(0)
@@ -388,9 +405,34 @@ def download_attendance_report():
     from flask import make_response
     response = make_response(output.getvalue())
     response.headers['Content-Type'] = 'text/csv'
-    response.headers['Content-Disposition'] = f'attachment; filename=attendance_report_{start_date}_to_{end_date}.csv'
+    
+    # Create filename with filters
+    filename_parts = [f'timesheet_{start_date}_to_{end_date}']
+    if department:
+        filename_parts.append(f'dept_{department}')
+    if employee_ids:
+        filename_parts.append(f'{len(employee_ids)}_employees')
+    
+    filename = '_'.join(filename_parts) + '.csv'
+    response.headers['Content-Disposition'] = f'attachment; filename={filename}'
     
     return response
+
+@admin_bp.route('/reports/timesheet')
+@login_required
+@admin_required
+def timesheet_export():
+    """HR timesheet export page"""
+    # Get all active employees for selection
+    employees = User.query.filter_by(active=True, role='employee').order_by(User.first_name).all()
+    
+    # Get unique departments
+    departments = db.session.query(User.department).filter_by(active=True).distinct().all()
+    departments = [dept[0] for dept in departments if dept[0]]
+    
+    return render_template('admin/timesheet_export.html', 
+                         employees=employees, 
+                         departments=departments)
 
 # Leave Policy Management Routes
 @admin_bp.route('/leave-policies')
