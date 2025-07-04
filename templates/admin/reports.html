@@ -92,9 +92,30 @@
                 </div>
                 <div class="card-body">
                     <p>Advanced timesheet export with employee and department filtering options.</p>
-                    <a href="{{ url_for('admin.timesheet_export') }}" class="btn btn-primary">
-                        <i class="fas fa-file-export me-2"></i>Export Timesheets
-                    </a>
+                    <form method="GET" action="{{ url_for('admin.timesheet_export') }}">
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" name="start_date" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" name="end_date" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Employees (Leave empty for all employees)</label>
+                            <select class="form-select" name="employee_ids" multiple size="6">
+                                {% for employee in employees %}
+                                <option value="{{ employee.id }}">{{ employee.employee_id }} - {{ employee.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Hold Ctrl/Cmd to select multiple employees</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-export me-2"></i>Export Timesheets
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -152,3 +173,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+```
