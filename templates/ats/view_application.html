@@ -1,0 +1,373 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ application.candidate_name }} - ATS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>{{ application.candidate_name }}</h2>
+            <p class="text-muted mb-0">Applied for {{ application.job_posting.title }}</p>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('ats.pipeline') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Pipeline
+            </a>
+            <a href="{{ url_for('ats.evaluate_candidate', app_id=application.id) }}" class="btn btn-primary">
+                <i class="fas fa-star me-1"></i>Evaluate
+            </a>
+            <a href="{{ url_for('recruitment.schedule_interview', app_id=application.id) }}" class="btn btn-success">
+                <i class="fas fa-calendar me-1"></i>Schedule Interview
+            </a>
+        </div>
+    </div>
+
+    <!-- Status and Stage -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h6>Status</h6>
+                            <span class="badge bg-{% if application.status == 'hired' %}success{% elif application.status == 'rejected' %}danger{% elif application.status == 'offer_sent' %}warning{% else %}primary{% endif %} fs-6">
+                                {{ application.status.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Current Stage</h6>
+                            <span class="badge bg-info fs-6">{{ application.stage.replace('_', ' ').title() }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Priority</h6>
+                            <span class="badge bg-{% if application.priority == 'high' %}danger{% elif application.priority == 'medium' %}warning{% else %}secondary{% endif %} fs-6">
+                                {{ application.priority.title() }}
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Overall Rating</h6>
+                            {% if application.overall_rating %}
+                            <span class="badge bg-warning fs-6">
+                                <i class="fas fa-star"></i> {{ "%.1f"|format(application.overall_rating) }}/10
+                            </span>
+                            {% else %}
+                            <span class="text-muted">Not rated</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Candidate Details -->
+        <div class="col-md-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-user me-2"></i>Candidate Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> {{ application.candidate_email }}</p>
+                            <p><strong>Phone:</strong> {{ application.candidate_phone }}</p>
+                            {% if application.candidate_linkedin %}
+                            <p><strong>LinkedIn:</strong> 
+                                <a href="{{ application.candidate_linkedin }}" target="_blank">View Profile</a>
+                            </p>
+                            {% endif %}
+                            {% if application.current_company %}
+                            <p><strong>Current Company:</strong> {{ application.current_company }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if application.experience_years %}
+                            <p><strong>Experience:</strong> {{ application.experience_years }} years</p>
+                            {% endif %}
+                            {% if application.current_salary %}
+                            <p><strong>Current Salary:</strong> ${{ "{:,.0f}".format(application.current_salary) }}</p>
+                            {% endif %}
+                            {% if application.expected_salary %}
+                            <p><strong>Expected Salary:</strong> ${{ "{:,.0f}".format(application.expected_salary) }}</p>
+                            {% endif %}
+                            <p><strong>Applied Date:</strong> {{ application.applied_date.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if application.cover_letter %}
+                    <div class="mt-3">
+                        <h6>Cover Letter</h6>
+                        <div class="bg-light p-3 rounded">
+                            {{ application.cover_letter }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Interviews -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Interviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if interviews %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Round</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Interviewer</th>
+                                    <th>Status</th>
+                                    <th>Rating</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for interview in interviews %}
+                                <tr>
+                                    <td>{{ interview.interview_round }}</td>
+                                    <td>{{ interview.interview_type.replace('_', ' ').title() }}</td>
+                                    <td>{{ interview.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ interview.interviewer.full_name }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if interview.status == 'completed' %}success{% elif interview.status == 'cancelled' %}danger{% else %}primary{% endif %}">
+                                            {{ interview.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if interview.overall_rating %}
+                                        {{ "%.1f"|format(interview.overall_rating) }}/10
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if interview.status == 'scheduled' %}
+                                        <a href="{{ url_for('recruitment.interview_feedback', interview_id=interview.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">Add Feedback</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No interviews scheduled yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Evaluations -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-star me-2"></i>Evaluations</h5>
+                </div>
+                <div class="card-body">
+                    {% if evaluations %}
+                    {% for evaluation in evaluations %}
+                    <div class="evaluation-item border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6>{{ evaluation.evaluation_type.replace('_', ' ').title() }}</h6>
+                                <p class="text-muted mb-1">by {{ evaluation.evaluator.full_name }}</p>
+                                <p class="mb-2">
+                                    <strong>Overall Rating:</strong> 
+                                    <span class="badge bg-warning">{{ evaluation.overall_rating }}/10</span>
+                                    <strong class="ms-3">Recommendation:</strong> 
+                                    <span class="badge bg-{% if evaluation.recommendation == 'strongly_recommend' %}success{% elif evaluation.recommendation == 'recommend' %}primary{% elif evaluation.recommendation == 'neutral' %}secondary{% else %}danger{% endif %}">
+                                        {{ evaluation.recommendation.replace('_', ' ').title() }}
+                                    </span>
+                                </p>
+                            </div>
+                            <small class="text-muted">{{ evaluation.evaluation_date.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        
+                        {% if evaluation.strengths %}
+                        <p><strong>Strengths:</strong> {{ evaluation.strengths }}</p>
+                        {% endif %}
+                        {% if evaluation.weaknesses %}
+                        <p><strong>Areas for Improvement:</strong> {{ evaluation.weaknesses }}</p>
+                        {% endif %}
+                        {% if evaluation.feedback %}
+                        <p><strong>Feedback:</strong> {{ evaluation.feedback }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No evaluations yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Actions and Timeline -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="moveToStage('offer_negotiation')">
+                            <i class="fas fa-handshake me-1"></i>Create Offer
+                        </button>
+                        <button class="btn btn-info" onclick="moveToStage('technical_interview')">
+                            <i class="fas fa-code me-1"></i>Technical Round
+                        </button>
+                        <button class="btn btn-warning" onclick="moveToStage('hr_interview')">
+                            <i class="fas fa-users me-1"></i>HR Interview
+                        </button>
+                        <button class="btn btn-danger" onclick="rejectApplication()">
+                            <i class="fas fa-times me-1"></i>Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Offers -->
+            {% if offers %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-contract me-2"></i>Job Offers</h5>
+                </div>
+                <div class="card-body">
+                    {% for offer in offers %}
+                    <div class="offer-item border-bottom pb-2 mb-2">
+                        <h6>{{ offer.position_title }}</h6>
+                        <p class="mb-1">
+                            <strong>Salary:</strong> ${{ "{:,.0f}".format(offer.salary_offered) }}
+                        </p>
+                        <p class="mb-1">
+                            <span class="badge bg-{% if offer.status == 'accepted' %}success{% elif offer.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                {{ offer.status.title() }}
+                            </span>
+                        </p>
+                        <small class="text-muted">Sent: {{ offer.offer_sent_date.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Activity Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history me-2"></i>Activity Timeline</h5>
+                </div>
+                <div class="card-body">
+                    {% if activities %}
+                    <div class="timeline">
+                        {% for activity, user in activities %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <p class="mb-1">{{ activity.description }}</p>
+                                <small class="text-muted">{{ user.full_name }} - {{ activity.activity_date.strftime('%m/%d %H:%M') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No activities yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Move Stage Modal -->
+<div class="modal fade" id="moveStageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Move to Stage</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="moveStageForm" method="POST" action="{{ url_for('ats.move_stage', app_id=application.id) }}">
+                <div class="modal-body">
+                    <input type="hidden" name="new_stage" id="newStageInput">
+                    <p>Are you sure you want to move this candidate to <span id="stageName"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Move Stage</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #007bff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+.evaluation-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.offer-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+</style>
+
+<script>
+function moveToStage(stage) {
+    document.getElementById('newStageInput').value = stage;
+    document.getElementById('stageName').textContent = stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    new bootstrap.Modal(document.getElementById('moveStageModal')).show();
+}
+
+function rejectApplication() {
+    if (confirm('Are you sure you want to reject this application?')) {
+        window.location.href = '{{ url_for("ats.reject_application", app_id=application.id) }}';
+    }
+}
+</script>
+{% endblock %}

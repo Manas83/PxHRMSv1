@@ -1,0 +1,269 @@
+
+{% extends "base.html" %}
+
+{% block title %}ATS Reports - HRMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar me-2"></i>ATS Reports & Analytics</h2>
+        <div class="btn-group">
+            <a href="{{ url_for('ats.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line me-1"></i>Dashboard
+            </a>
+            <a href="{{ url_for('ats.pipeline') }}" class="btn btn-outline-primary">
+                <i class="fas fa-tasks me-1"></i>Pipeline
+            </a>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ "%.0f"|format(avg_time_to_hire) }}</h3>
+                    <p class="mb-0">Avg. Days to Hire</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ "%.1f"|format(interview_completion_rate) }}%</h3>
+                    <p class="mb-0">Interview Completion Rate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ funnel_data.get('hired', 0) }}</h3>
+                    <p class="mb-0">Total Hires</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ funnel_data.get('applied', 0) }}</h3>
+                    <p class="mb-0">Total Applications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Hiring Funnel -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-funnel-dollar me-2"></i>Hiring Funnel</h5>
+                </div>
+                <div class="card-body">
+                    <div class="funnel-chart">
+                        {% for stage, count in funnel_data.items() %}
+                        <div class="funnel-stage">
+                            <div class="stage-bar" style="width: {{ (count / funnel_data.get('applied', 1) * 100)|round(1) }}%">
+                                <span class="stage-label">{{ stage.title() }}</span>
+                                <span class="stage-count">{{ count }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source Effectiveness -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Source Effectiveness</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Applications</th>
+                                    <th>Hired</th>
+                                    <th>Conversion %</th>
+                                    <th>Avg. Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for source in source_report %}
+                                {% set conversion = (source.hired / source.total * 100) if source.total > 0 else 0 %}
+                                <tr>
+                                    <td class="text-capitalize">{{ source.source }}</td>
+                                    <td>{{ source.total }}</td>
+                                    <td>{{ source.hired or 0 }}</td>
+                                    <td>{{ "%.1f"|format(conversion) }}%</td>
+                                    <td>
+                                        {% if source.avg_rating %}
+                                        {{ "%.1f"|format(source.avg_rating) }}/10
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Reports -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-download me-2"></i>Export Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="report-option">
+                                <h6>Application Report</h6>
+                                <p class="text-muted">Detailed list of all applications with status and timeline.</p>
+                                <form method="GET" action="{{ url_for('ats.export_applications') }}">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="date" class="form-control form-control-sm" name="start_date" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="date" class="form-control form-control-sm" name="end_date" required>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select name="format" class="form-select form-select-sm">
+                                            <option value="excel">Excel</option>
+                                            <option value="csv">CSV</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">
+                                        <i class="fas fa-download me-1"></i>Export
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="report-option">
+                                <h6>Interview Report</h6>
+                                <p class="text-muted">Interview schedules, feedback, and ratings summary.</p>
+                                <form method="GET" action="{{ url_for('ats.export_interviews') }}">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="date" class="form-control form-control-sm" name="start_date" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="date" class="form-control form-control-sm" name="end_date" required>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select name="format" class="form-select form-select-sm">
+                                            <option value="excel">Excel</option>
+                                            <option value="csv">CSV</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">
+                                        <i class="fas fa-download me-1"></i>Export
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="report-option">
+                                <h6>Hiring Analytics</h6>
+                                <p class="text-muted">Comprehensive hiring metrics and conversion rates.</p>
+                                <form method="GET" action="{{ url_for('ats.export_analytics') }}">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="date" class="form-control form-control-sm" name="start_date" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="date" class="form-control form-control-sm" name="end_date" required>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select name="format" class="form-select form-select-sm">
+                                            <option value="excel">Excel</option>
+                                            <option value="pdf">PDF</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">
+                                        <i class="fas fa-download me-1"></i>Export
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.funnel-chart {
+    padding: 20px 0;
+}
+
+.funnel-stage {
+    margin-bottom: 10px;
+}
+
+.stage-bar {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    height: 40px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.stage-bar:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.stage-label {
+    font-size: 14px;
+}
+
+.stage-count {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+
+.report-option {
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    border-radius: 8px;
+    height: 100%;
+}
+
+.report-option h6 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.report-option p {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+</style>
+{% endblock %}

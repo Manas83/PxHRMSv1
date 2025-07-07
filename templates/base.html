@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HRMS - Human Resource Management System{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
-    
+
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -21,11 +21,11 @@
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="fas fa-users me-2"></i>HRMS
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% if current_user.can_manage_employees %}
@@ -50,22 +50,32 @@
                                 </a></li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-briefcase me-1"></i>Recruitment
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url_for('recruitment.dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('recruitment.jobs') }}">
-                                    <i class="fas fa-briefcase me-2"></i>Job Postings
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('recruitment.add_job') }}">
-                                    <i class="fas fa-plus me-2"></i>Add Job Posting
-                                </a></li>
-                            </ul>
-                        </li>
+                        {% if current_user.role in ['admin', 'hr'] %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users-cog me-1"></i>Recruitment & ATS
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('ats.dashboard') }}">
+                                <i class="fas fa-chart-line me-2"></i>ATS Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ats.pipeline') }}">
+                                <i class="fas fa-tasks me-2"></i>Candidate Pipeline
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('recruitment.jobs') }}">
+                                <i class="fas fa-briefcase me-2"></i>Job Postings
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ats.reports') }}">
+                                <i class="fas fa-chart-bar me-2"></i>ATS Reports
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('recruitment.public_jobs') }}">
+                                <i class="fas fa-globe me-2"></i>Public Job Portal
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-graduation-cap me-1"></i>Training
@@ -132,7 +142,7 @@
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
-                        
+
                         <!-- Employee Basic Features -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -153,14 +163,14 @@
                                 </a></li>
                             </ul>
                         </li>
-                        
+
                         <!-- Holidays - visible to all employees -->
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('admin.holidays') }}">
                                 <i class="fas fa-gift me-1"></i>Holidays
                             </a>
                         </li>
-                        
+
                         <!-- My Profile -->
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('employee.profile') }}">
@@ -189,7 +199,7 @@
                         {% endif %}
                     {% endif %}
                 </ul>
-                
+
                 <ul class="navbar-nav">
                     <!-- Notifications Dropdown -->
                     <li class="nav-item dropdown">
@@ -241,7 +251,7 @@
                             {% endif %}
                         </ul>
                     </li>
-                    
+
                     <!-- User Profile Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -287,7 +297,7 @@
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script src="{{ url_for('static', filename='js/geolocation.js') }}"></script>
-    
+
     <!-- Notification JavaScript -->
     <script>
     function markAllNotificationsRead() {
@@ -309,7 +319,7 @@
         });
     }
     </script>
-    
+
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

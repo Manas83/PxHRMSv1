@@ -1,0 +1,242 @@
+
+{% extends "base.html" %}
+
+{% block title %}Candidate Pipeline - ATS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-tasks me-2"></i>Candidate Pipeline</h2>
+        <div class="btn-group">
+            <a href="{{ url_for('ats.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line me-1"></i>Dashboard
+            </a>
+            <a href="{{ url_for('recruitment.jobs') }}" class="btn btn-outline-primary">
+                <i class="fas fa-briefcase me-1"></i>Jobs
+            </a>
+        </div>
+    </div>
+
+    <!-- Pipeline Columns -->
+    <div class="row pipeline-board">
+        {% for stage in stages %}
+        <div class="col-md-2">
+            <div class="pipeline-column">
+                <div class="pipeline-header">
+                    <h6 class="text-center mb-0">
+                        {{ stage.replace('_', ' ').title() }}
+                        <span class="badge bg-secondary ms-1">{{ pipeline_data[stage]|length }}</span>
+                    </h6>
+                </div>
+                
+                <div class="pipeline-cards">
+                    {% for application, job in pipeline_data[stage] %}
+                    <div class="candidate-card" data-app-id="{{ application.id }}">
+                        <div class="card-header d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ application.candidate_name }}</h6>
+                                <small class="text-muted">{{ job.title }}</small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('ats.view_application', app_id=application.id) }}">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('ats.evaluate_candidate', app_id=application.id) }}">
+                                        <i class="fas fa-star me-2"></i>Evaluate
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('recruitment.schedule_interview', app_id=application.id) }}">
+                                        <i class="fas fa-calendar me-2"></i>Schedule Interview
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('ats.move_stage', app_id=application.id) }}" class="d-inline">
+                                            <select name="new_stage" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                <option value="">Move to...</option>
+                                                {% for s in stages %}
+                                                {% if s != stage %}
+                                                <option value="{{ s }}">{{ s.replace('_', ' ').title() }}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" 
+                                                onclick="rejectCandidate({{ application.id }})">
+                                            <i class="fas fa-times me-2"></i>Reject
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="candidate-info">
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-envelope me-1"></i>{{ application.candidate_email }}
+                                </small>
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-phone me-1"></i>{{ application.candidate_phone }}
+                                </small>
+                                {% if application.experience_years %}
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-briefcase me-1"></i>{{ application.experience_years }} years exp.
+                                </small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mt-2">
+                                {% if application.overall_rating %}
+                                <div class="rating-display">
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-star"></i> {{ "%.1f"|format(application.overall_rating) }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="priority-badge">
+                                    {% if application.priority == 'high' %}
+                                    <span class="badge bg-danger">High Priority</span>
+                                    {% elif application.priority == 'medium' %}
+                                    <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Low</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Applied: {{ application.applied_date.strftime('%m/%d') }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reject Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="rejectForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejection_reason" class="form-label">Reason for Rejection</label>
+                        <select class="form-select" name="rejection_reason" required>
+                            <option value="">Select reason...</option>
+                            <option value="Qualifications not met">Qualifications not met</option>
+                            <option value="Experience insufficient">Experience insufficient</option>
+                            <option value="Poor interview performance">Poor interview performance</option>
+                            <option value="Cultural fit concerns">Cultural fit concerns</option>
+                            <option value="Position filled">Position filled</option>
+                            <option value="Salary expectations mismatch">Salary expectations mismatch</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.pipeline-board {
+    min-height: 80vh;
+}
+
+.pipeline-column {
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-right: 15px;
+    height: 80vh;
+    overflow-y: auto;
+}
+
+.pipeline-header {
+    background: #fff;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pipeline-cards {
+    padding: 15px;
+}
+
+.candidate-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.candidate-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.candidate-card .card-header {
+    background: none;
+    border-bottom: 1px solid #f1f1f1;
+    padding: 10px 15px;
+}
+
+.candidate-card .card-body {
+    padding: 10px 15px;
+}
+
+.candidate-info small {
+    margin-bottom: 3px;
+}
+
+.rating-display, .priority-badge {
+    margin-top: 5px;
+}
+
+.form-select-sm {
+    font-size: 0.875rem;
+}
+</style>
+
+<script>
+function rejectCandidate(appId) {
+    document.getElementById('rejectForm').action = `/ats/applications/${appId}/reject`;
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+
+// Make cards clickable
+document.querySelectorAll('.candidate-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            const appId = this.dataset.appId;
+            window.location.href = `/ats/applications/${appId}`;
+        }
+    });
+});
+</script>
+{% endblock %}

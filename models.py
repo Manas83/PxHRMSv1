@@ -271,7 +271,7 @@ class JobPosting(db.Model):
     # Relationship
     applications = db.relationship('JobApplication', backref='job_posting', lazy=True)
 
-# Job Applications
+# Job Applications - Enhanced ATS
 class JobApplication(db.Model):
     __tablename__ = 'job_applications'
     
@@ -280,32 +280,197 @@ class JobApplication(db.Model):
     candidate_name = db.Column(db.String(100), nullable=False)
     candidate_email = db.Column(db.String(120), nullable=False)
     candidate_phone = db.Column(db.String(15), nullable=False)
+    candidate_linkedin = db.Column(db.String(200))
+    candidate_portfolio = db.Column(db.String(200))
+    current_company = db.Column(db.String(100))
+    current_designation = db.Column(db.String(100))
+    experience_years = db.Column(db.Integer)
+    current_salary = db.Column(db.Float)
+    expected_salary = db.Column(db.Float)
+    notice_period = db.Column(db.Integer)  # in days
     resume_filename = db.Column(db.String(255))
     resume_path = db.Column(db.String(500))
     cover_letter = db.Column(db.Text)
-    status = db.Column(db.String(30), default='applied')  # applied/screening/interview/rejected/selected
+    status = db.Column(db.String(30), default='applied')  # applied/screening/interview/rejected/selected/offer_sent/hired
+    stage = db.Column(db.String(50), default='application_review')  # application_review/phone_screening/technical_interview/hr_interview/final_interview/offer_negotiation
+    priority = db.Column(db.String(20), default='medium')  # low/medium/high
+    source = db.Column(db.String(50), default='website')  # website/linkedin/referral/job_board
+    referral_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     applied_date = db.Column(db.DateTime, default=datetime.utcnow)
-    interview_date = db.Column(db.DateTime)
+    last_activity_date = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.Text)
+    internal_notes = db.Column(db.Text)  # Private notes for hiring team
+    resume_score = db.Column(db.Float)  # AI/keyword matching score
+    skills_matched = db.Column(db.Text)  # JSON array of matched skills
+    overall_rating = db.Column(db.Float)  # Average of all interview ratings
+    is_archived = db.Column(db.Boolean, default=False)
+    rejection_reason = db.Column(db.String(200))
     
-    # Relationship
+    # Relationships
     interviews = db.relationship('Interview', backref='application', lazy=True)
+    evaluations = db.relationship('CandidateEvaluation', backref='application', lazy=True)
+    offers = db.relationship('JobOffer', backref='application', lazy=True)
+    activities = db.relationship('ApplicationActivity', backref='application', lazy=True)
+    referrer = db.relationship('User', foreign_keys=[referral_by], backref='referrals')
 
-# Interview Scheduling
+# Candidate Evaluation/Scoring
+class CandidateEvaluation(db.Model):
+    __tablename__ = 'candidate_evaluations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('job_applications.id'), nullable=False)
+    evaluator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    evaluation_type = db.Column(db.String(50), nullable=False)  # resume_review/phone_screening/technical/hr/final
+    technical_skills = db.Column(db.Float)  # 1-10 rating
+    communication_skills = db.Column(db.Float)
+    cultural_fit = db.Column(db.Float)
+    experience_relevance = db.Column(db.Float)
+    problem_solving = db.Column(db.Float)
+    overall_rating = db.Column(db.Float, nullable=False)
+    strengths = db.Column(db.Text)
+    weaknesses = db.Column(db.Text)
+    recommendation = db.Column(db.String(20))  # strongly_recommend/recommend/neutral/not_recommend/reject
+    feedback = db.Column(db.Text)
+    evaluation_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    evaluator = db.relationship('User', backref='evaluations')
+
+# Job Offers
+class JobOffer(db.Model):
+    __tablename__ = 'job_offers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('job_applications.id'), nullable=False)
+    offered_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    position_title = db.Column(db.String(100), nullable=False)
+    department = db.Column(db.String(50), nullable=False)
+    salary_offered = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(10), default='USD')
+    employment_type = db.Column(db.String(30), nullable=False)  # full_time/part_time/contract
+    start_date = db.Column(db.Date)
+    benefits = db.Column(db.Text)
+    terms_conditions = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')  # pending/accepted/rejected/withdrawn/expired
+    offer_sent_date = db.Column(db.DateTime, default=datetime.utcnow)
+    expiry_date = db.Column(db.DateTime)
+    candidate_response_date = db.Column(db.DateTime)
+    candidate_comments = db.Column(db.Text)
+    offer_letter_path = db.Column(db.String(500))
+    
+    # Relationships
+    offered_by_user = db.relationship('User', backref='job_offers')
+
+# Application Activity Log
+class ApplicationActivity(db.Model):
+    __tablename__ = 'application_activities'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('job_applications.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    activity_type = db.Column(db.String(50), nullable=False)  # status_change/note_added/interview_scheduled/email_sent
+    description = db.Column(db.Text, nullable=False)
+    old_value = db.Column(db.String(100))
+    new_value = db.Column(db.String(100))
+    activity_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='application_activities')
+
+# Email Templates for ATS
+class EmailTemplate(db.Model):
+    __tablename__ = 'email_templates'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    template_type = db.Column(db.String(50), nullable=False)  # application_received/interview_invitation/rejection/offer
+    subject = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    creator = db.relationship('User', backref='email_templates')
+
+# Background Check
+class BackgroundCheck(db.Model):
+    __tablename__ = 'background_checks'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('job_applications.id'), nullable=False)
+    check_type = db.Column(db.String(50), nullable=False)  # employment/education/criminal/reference
+    status = db.Column(db.String(20), default='pending')  # pending/in_progress/completed/failed
+    provider = db.Column(db.String(100))
+    initiated_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    initiated_date = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_date = db.Column(db.DateTime)
+    result = db.Column(db.String(20))  # clear/flagged/failed
+    details = db.Column(db.Text)
+    report_file = db.Column(db.String(500))
+    
+    # Relationships
+    initiator = db.relationship('User', backref='background_checks')
+
+# Interview Scheduling - Enhanced
+class InterviewPanel(db.Model):
+    __tablename__ = 'interview_panels'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    interview_id = db.Column(db.Integer, db.ForeignKey('interviews.id'), nullable=False)
+    interviewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    role = db.Column(db.String(50))  # primary/secondary/observer
+    
+    # Relationships
+    interviewer = db.relationship('User', backref='interview_panels')
+
+# ATS Configuration
+class ATSConfiguration(db.Model):
+    __tablename__ = 'ats_configurations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    setting_name = db.Column(db.String(100), nullable=False, unique=True)
+    setting_value = db.Column(db.Text)
+    setting_type = db.Column(db.String(20), default='string')  # string/integer/boolean/json
+    description = db.Column(db.Text)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Interview Scheduling - Enhanced
 class Interview(db.Model):
     __tablename__ = 'interviews'
     
     id = db.Column(db.Integer, primary_key=True)
     application_id = db.Column(db.Integer, db.ForeignKey('job_applications.id'), nullable=False)
     interviewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    interview_round = db.Column(db.Integer, default=1)
+    interview_type = db.Column(db.String(30), nullable=False)  # phone/video/in-person/technical/hr/panel
     scheduled_date = db.Column(db.DateTime, nullable=False)
-    interview_type = db.Column(db.String(30), nullable=False)  # phone/video/in-person
+    duration_minutes = db.Column(db.Integer, default=60)
     location = db.Column(db.String(200))
     meeting_link = db.Column(db.String(500))
-    status = db.Column(db.String(20), default='scheduled')  # scheduled/completed/cancelled/rescheduled
+    meeting_id = db.Column(db.String(100))
+    meeting_password = db.Column(db.String(50))
+    status = db.Column(db.String(20), default='scheduled')  # scheduled/completed/cancelled/rescheduled/no_show
     feedback = db.Column(db.Text)
-    rating = db.Column(db.Integer)  # 1-10 rating
+    technical_assessment = db.Column(db.Text)
+    strengths = db.Column(db.Text)
+    concerns = db.Column(db.Text)
+    recommendation = db.Column(db.String(20))  # hire/maybe/no_hire
+    overall_rating = db.Column(db.Float)  # 1-10 rating
+    punctuality_rating = db.Column(db.Integer)  # 1-5
+    communication_rating = db.Column(db.Integer)  # 1-5
+    technical_rating = db.Column(db.Integer)  # 1-5
+    culture_fit_rating = db.Column(db.Integer)  # 1-5
+    reminder_sent = db.Column(db.Boolean, default=False)
+    rescheduled_from = db.Column(db.Integer, db.ForeignKey('interviews.id'))
+    cancelled_reason = db.Column(db.String(200))
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_date = db.Column(db.DateTime)
+    
+    # Relationships
+    panel = db.relationship('InterviewPanel', backref='interview', lazy=True)
+    rescheduled_interviews = db.relationship('Interview', backref=db.backref('original_interview', remote_side='Interview.id'))
 
 # Training Programs
 class TrainingProgram(db.Model):

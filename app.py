@@ -86,6 +86,7 @@ from routes.recruitment import recruitment_bp
 from routes.training import training_bp
 from routes.exit_management import exit_bp
 from routes.self_service import self_service_bp
+from routes.ats import ats_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -97,16 +98,17 @@ app.register_blueprint(recruitment_bp)
 app.register_blueprint(training_bp)
 app.register_blueprint(exit_bp)
 app.register_blueprint(self_service_bp)
+app.register_blueprint(ats_bp)
 
 with app.app_context():
     # Import models to ensure tables are created
     import models
     db.create_all()
-    
+
     # Create default admin user if none exists
     from models import User
     from werkzeug.security import generate_password_hash
-    
+
     admin_user = User.query.filter_by(email='admin@hrms.com').first()
     if not admin_user:
         admin_user = User(
