@@ -45,6 +45,14 @@ except Exception as e:
     logging.warning(f"Mail service initialization failed: {e}")
     # Continue without mail service for deployment
 
+# Create tables if they don't exist
+with app.app_context():
+    try:
+        db.create_all()
+        logging.info("Database tables verified/created")
+    except Exception as e:
+        logging.error(f"Database initialization error: {e}")
+
 # Now import blueprints (AFTER extensions are initialized)
 
 

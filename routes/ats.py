@@ -20,19 +20,34 @@ ats_bp = Blueprint('ats', __name__, url_prefix='/ats')
 @admin_required
 def dashboard():
     """ATS Dashboard with comprehensive metrics"""
-    # Time-based filters
-    today = date.today()
-    week_start = today - timedelta(days=today.weekday())
-    month_start = today.replace(day=1)
-    
-    # Application metrics
-    total_applications = JobApplication.query.count()
-    applications_this_week = JobApplication.query.filter(
-        JobApplication.applied_date >= week_start
-    ).count()
-    applications_this_month = JobApplication.query.filter(
-        JobApplication.applied_date >= month_start
-    ).count()
+    try:
+        # Time-based filters
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        month_start = today.replace(day=1)
+        
+        # Application metrics
+        total_applications = JobApplication.query.count()
+        applications_this_week = JobApplication.query.filter(
+            JobApplication.applied_date >= week_start
+        ).count()
+        applications_this_month = JobApplication.query.filter(
+            JobApplication.applied_date >= month_start
+        ).count()
+    except Exception as e:
+        current_app.logger.error(f"ATS Dashboard error: {e}")
+        # Return dashboard with zero metrics if there's an error
+        return render_template('ats/dashboard.html',
+                             total_applications=0,
+                             applications_this_week=0,
+                             applications_this_month=0,
+                             pipeline_stats=[],
+                             active_jobs=0,
+                             upcoming_interviews=0,
+                             interviews_today=0,
+                             recent_activities=[],
+                             conversion_rate=0,
+                             source_stats=[])
     
     # Pipeline metrics
     pipeline_stats = db.session.query(

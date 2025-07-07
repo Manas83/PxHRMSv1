@@ -1,7 +1,3 @@
-` tags.
-
-```
-<replit_final_file>
 // Geolocation handling for HRMS attendance system
 
 let userLocation = null;
@@ -27,31 +23,42 @@ function initializeGeolocation() {
 
 // Get current location
 function getCurrentLocation() {
-    const locationStatus = document.getElementById('locationStatus');
-    if (locationStatus) {
-        locationStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
-        locationStatus.className = 'alert alert-info';
-    }
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation is not supported by this browser.'));
+            return;
+        }
 
-    navigator.geolocation.getCurrentPosition(
-        function(position) {
-            userLocation = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                accuracy: position.coords.accuracy,
-                timestamp: new Date().toISOString()
-            };
-
-            console.log('Location obtained:', userLocation);
-            showLocationSuccess();
-            updateLocationDisplay();
-        },
-        function(error) {
-            console.error('Geolocation error:', error);
-            handleLocationError(error);
-        },
-        LOCATION_CONFIG
-    );
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                userLocation = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                };
+                resolve(userLocation);
+            },
+            error => {
+                let errorMessage = 'An unknown error occurred.';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'User denied the request for Geolocation.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'The request to get user location timed out.';
+                        break;
+                }
+                reject(new Error(errorMessage));
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    });
 }
 
 // Handle location errors
@@ -104,7 +111,7 @@ function updateLocationDisplay() {
                     <i class="fas fa-map-marker-alt"></i>
                     Lat: ${userLocation.latitude.toFixed(6)}, 
                     Lng: ${userLocation.longitude.toFixed(6)}
-                    (±${Math.round(userLocation.accuracy)}m)
+                    (±${Math.round(0)}m)
                 </small>
             `;
         }
@@ -154,7 +161,7 @@ function submitAttendance(action) {
         const accInput = document.createElement('input');
         accInput.type = 'hidden';
         accInput.name = 'accuracy';
-        accInput.value = userLocation.accuracy;
+        accInput.value = 0;
         form.appendChild(accInput);
     }
 
@@ -207,6 +214,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Distance in meters
 }
 
+function allowPunchWithoutLocation() {
+    userLocation = null;
+    return Promise.resolve(null);
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Only initialize geolocation on attendance pages
@@ -238,3 +250,8 @@ window.GeolocationManager = {
     userLocation: function() { return userLocation; },
     checkWorkMode: checkWorkMode
 };
+
+// Make functions available globally
+window.getCurrentLocation = getCurrentLocation;
+window.allowPunchWithoutLocation = allowPunchWithoutLocation;
+window.userLocation = userLocation;
